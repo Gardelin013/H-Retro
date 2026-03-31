@@ -12,13 +12,6 @@
 	var/material/reinf_material
 	var/reinforcing = 0
 
-/obj/structure/girder/Initialize()
-	. = ..()
-	add_debris_element()
-
-/obj/structure/girder/add_debris_element()
-	AddElement(/datum/element/debris, DEBRIS_SPARKS, -15, 8, 1)
-
 /obj/structure/girder/displaced
 	icon_state = "displaced"
 	anchored = 0
@@ -183,7 +176,7 @@
 				return
 
 	else
-		W.set_cooldown()
+		user.setClickCooldown(W.update_attack_cooldown())
 		user.do_attack_animation(src)
 		obj_attack_sound(W)
 		shake_animation(stime = 2)
@@ -195,7 +188,6 @@
 				dismantle()
 		else
 			user.visible_message(SPAN("danger", "[user] hits \the [src] with \the [W], but it bounces off!"))
-		return
 
 	return ..()
 

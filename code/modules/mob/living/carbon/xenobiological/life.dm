@@ -40,7 +40,7 @@
 				// the damage is mostly determined by how fast its body cools
 				adjustToxLoss(30)
 
-	update_health()
+	updatehealth()
 
 	return //TODO: DEFERRED
 
@@ -69,7 +69,7 @@
 	if(istype(ingested)) ingested.metabolize()
 	if(bloodstr) bloodstr.metabolize()
 
-	src.update_health()
+	src.updatehealth()
 
 	return //TODO: DEFERRED
 

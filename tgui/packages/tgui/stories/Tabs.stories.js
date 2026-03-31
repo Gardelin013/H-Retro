@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 /**
  * @file
  * @copyright 2021 Aleksej Komarov

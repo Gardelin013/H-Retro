@@ -18,7 +18,6 @@
 	return ITEM_SIZE_NO_CONTAINER
 
 /obj/item/device/radio/intercom/receive()
-	. = ..()
 	flick("intercom-r", src)
 
 /obj/item/device/radio/intercom/custom

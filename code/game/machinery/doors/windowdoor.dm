@@ -29,16 +29,6 @@
 	update_nearby_tiles()
 	update_icon()
 	hitsound = pick(SFX_GLASS_HIT)
-	add_debris_element()
-	add_think_ctx("hack_context", CALLBACK(src, nameof(.proc/on_hacked)), 0)
-
-/obj/machinery/door/window/examine(mob/user, infix)
-	. = ..()
-	if(Adjacent(user) && operating == DOOR_FAILURE)
-		. += SPAN("warning", "It appears to be jammed, and its lock looks cooked.")
-
-/obj/machinery/door/window/add_debris_element()
-	AddElement(/datum/element/debris, DEBRIS_GLASS, -10, 5)
 
 /obj/machinery/door/window/on_update_icon()
 	ClearOverlays()
@@ -221,27 +211,20 @@
 
 /obj/machinery/door/window/emag_act(remaining_charges, mob/user)
 	if(density && operable())
+		operating = DOOR_FAILURE
 		flick("[base_state]spark", src)
-		set_next_think_ctx("hack_context", world.time + 1 SECONDS)
+		set_next_think(world.time + 1 SECOND)
 		return 1
 
 /obj/machinery/door/window/think()
 	INVOKE_ASYNC(src, nameof(.proc/open), FALSE, TRUE)
-
-/obj/machinery/door/window/proc/on_hacked()
-	if(density)
-		INVOKE_ASYNC(src, nameof(.proc/open), FALSE, FALSE)
-		set_next_think_ctx("hack_context", world.time + 1 SECONDS)
-		return
-	operating = DOOR_FAILURE
-	return
 
 /obj/machinery/door/emp_act(severity)
 	if(prob(60 / severity))
 		INVOKE_ASYNC(src, nameof(.proc/open), FALSE, TRUE)
 
 /obj/machinery/door/window/attackby(obj/item/I, mob/user)
-	if(operating > 0)
+	if(operating)
 		return
 
 	if(istype(I, /obj/item/melee/energy/blade))
@@ -311,7 +294,7 @@
 		var/aforce = I.force
 		playsound(loc, GET_SFX(SFX_GLASS_HIT), 75, 1)
 		visible_message("<span class='danger'>[src] was hit by [I].</span>")
-		I.set_cooldown()
+		user.setClickCooldown(I.update_attack_cooldown())
 		user.do_attack_animation(src)
 		if(I.damtype == BRUTE || I.damtype == BURN)
 			take_damage(aforce)

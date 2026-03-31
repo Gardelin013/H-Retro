@@ -14,7 +14,7 @@ const LEVEL_ERROR = 4;
 
 const log = (level, ns, ...args) => {
   // Send logs to a remote log collector
-  if (import.meta.env.DEV) {
+  if (process.env.NODE_ENV !== "production") {
     sendLogEntry(level, ns, ...args);
   }
   // Send important logs to the backend

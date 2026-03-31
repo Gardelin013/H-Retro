@@ -277,7 +277,7 @@ GLOBAL_LIST_EMPTY(music_players)
 		return FALSE
 	if(!MayAdjust(user))
 		return FALSE
-	if(!user.has_in_hands(W))
+	if(W != user.get_active_hand())
 		return FALSE
 
 	if(!CanPhysicallyInteract(user))
@@ -329,8 +329,8 @@ GLOBAL_LIST_EMPTY(music_players)
 		return
 
 	//makes sure that the clothing is equipped so that we can't drag it into our hand from miles away.
-	if(loc != usr)
-		return ..()
+	if(!(src.loc == usr))
+		return
 
 	if(usr.incapacitated())
 		return

@@ -6,7 +6,7 @@
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "bolt"
 	item_state = "bolt"
-	throwforce = 10.0
+	throwforce = 8
 	w_class = ITEM_SIZE_NORMAL
 	sharp = 1
 	edge = 0
@@ -21,12 +21,12 @@
 /obj/item/arrow/pre_launched()
 	..()
 	throw_spin = FALSE
-	icon_state = "[initial(icon_state)]-f"
+	icon = 'icons/obj/projectiles.dmi'
 
 /obj/item/arrow/post_launched()
 	..()
 	throw_spin = TRUE
-	icon_state = initial(icon_state)
+	icon = 'icons/obj/weapons.dmi'
 
 /obj/item/spike
 	name = "alloy spike"
@@ -46,12 +46,12 @@
 /obj/item/spike/pre_launched()
 	..()
 	throw_spin = FALSE
-	icon_state = "[initial(icon_state)]-f"
+	icon = 'icons/obj/projectiles.dmi'
 
 /obj/item/spike/post_launched()
 	..()
 	throw_spin = TRUE
-	icon_state = initial(icon_state)
+	icon = 'icons/obj/weapons.dmi'
 
 /obj/item/arrow/quill
 	name = "vox quill"
@@ -93,12 +93,13 @@
 
 	var/obj/item/bolt
 	var/tension = 0                         // Current draw on the bow.
-	var/max_tension = 4                     // Highest possible tension.
+	var/max_tension = 5                     // Highest possible tension.
+	var/force_multiplier = 2                // Multiplier of release force.
 	var/obj/item/cell/cell = null    // Used for firing superheated rods.
 	var/current_user                        // Used to check if the crossbow has changed hands since being drawn.
 
 /obj/item/gun/launcher/crossbow/update_release_force()
-	release_force = max(1, tension)
+	release_force = tension * force_multiplier
 
 /obj/item/gun/launcher/crossbow/consume_next_projectile(mob/user=null)
 	if(tension <= 0)

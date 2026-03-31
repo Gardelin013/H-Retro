@@ -8,6 +8,7 @@ import { Box, Button, Section, Tooltip } from "../components";
 
 export const meta = {
   title: "Tooltip",
+  // eslint-disable-next-line react/display-name
   render: () => <Story />,
 };
 

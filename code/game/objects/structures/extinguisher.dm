@@ -75,7 +75,11 @@
 
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
-		if(!H.is_hand_usable())
+		var/obj/item/organ/external/temp = H.organs_by_name[BP_R_HAND]
+		if(user.hand)
+			temp = H.organs_by_name[BP_L_HAND]
+		if(temp && !temp.is_usable())
+			to_chat(user, SPAN_NOTICE("You try to move your [temp.name], but cannot!"))
 			return
 
 	if(has_extinguisher)

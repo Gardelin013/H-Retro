@@ -2,13 +2,14 @@
  * Default bone surgery step, does nothing.
  */
 /datum/surgery_step/bone
+	can_infect = TRUE
 	blood_level = BLOODY_HANDS
 	shock_level = 20
 
 	failure_sound = 'sound/effects/bonebreak1.ogg'
 
 /datum/surgery_step/bone/check_parent_organ(obj/item/organ/external/parent_organ, mob/living/carbon/human/target, obj/item/tool, atom/user)
-	return (..() && !BP_IS_ROBOTIC(parent_organ) && parent_organ.is_surgically_open() >= SURGERY_RETRACTED)
+	return (..() && !BP_IS_ROBOTIC(parent_organ) && parent_organ.open() >= SURGERY_RETRACTED)
 
 /**
  * Bone glueing step.
@@ -97,7 +98,7 @@
 		"[user]'s hand slips, damaging [target]'s [parent_organ.name] with \the [tool]!",
 		"Your hand slips, damaging [target]'s [parent_organ.name] with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(10, tool)
+	parent_organ.take_external_damage(10, used_weapon = tool)
 	parent_organ.status |= ORGAN_DISFIGURED
 
 /**
@@ -141,7 +142,7 @@
 		"[user]'s hand slips, damaging [target]'s face with \the [tool]!",
 		"Your hand slips, damaging [target]'s face with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(10, tool)
+	parent_organ.take_external_damage(10, used_weapon = tool)
 	parent_organ.status |= ORGAN_DISFIGURED
 
 /**
@@ -198,8 +199,8 @@
 		"[user]'s hand slips, damaging the [parent_organ.encased ? parent_organ.encased : "bones"] in [target]'s [parent_organ] with \the [tool]!",
 		"Your hand slips, damaging the [parent_organ.encased ? parent_organ.encased : "bones"] in [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(5, tool)
 	parent_organ.fracture()
+	parent_organ.take_external_damage(5, used_weapon = tool)
 
 /**
  * Applies bonegel on set bone.
@@ -282,4 +283,4 @@
 		"\The [tool] in [user]'s hand skips, jabbing the bone edges into the sides of [target]'s [parent_organ]!",
 		"Your hand jolts and \the [tool] skips, jabbing the bone edges into [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(15, tool)
+	parent_organ.take_external_damage(10, used_weapon = tool)

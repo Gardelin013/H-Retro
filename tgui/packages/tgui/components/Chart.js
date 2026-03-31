@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * @file
  * @copyright 2020 Aleksej Komarov
@@ -122,6 +123,7 @@ LineChart.defaultHooks = pureComponentHooks;
 
 const Stub = (props) => null;
 
+// IE8: No inline svg support
 export const Chart = {
-  Line: LineChart,
+  Line: Byond.IS_LTE_IE8 ? Stub : LineChart,
 };

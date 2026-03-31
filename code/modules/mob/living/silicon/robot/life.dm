@@ -24,13 +24,7 @@
 		if(connected_ai && !dead)
 			notify_ai(ROBOT_NOTIFICATION_SIGNAL_LOST)
 			dead = TRUE
-
-	var/old_lying = lying
-
 	update_canmove()
-
-	if (lying != old_lying)
-		update_transform()
 
 /mob/living/silicon/robot/proc/clamp_values()
 //	SetStunned(min(stunned, 30))
@@ -80,7 +74,7 @@
 		else
 			camera.set_status(1)
 
-	update_health()
+	updatehealth()
 
 	if(sleeping)
 		Paralyse(3)
@@ -129,6 +123,8 @@
 		ear_damage -= 0.05
 		ear_damage = max(ear_damage, 0)
 
+	set_density(!lying)
+
 	if((sdisabilities & BLIND))
 		blinded = TRUE
 	if((sdisabilities & DEAF))
@@ -143,7 +139,7 @@
 		druggy = max(0, druggy)
 
 	// update the state of modules and components here
-	if(stat != CONSCIOUS)
+	if(stat != 0)
 		uneq_all()
 
 	if(silicon_radio)
@@ -162,18 +158,18 @@
 			if(MED_VISION)
 				process_med_hud(src, 1)
 
-		if(syndicate)
-			for(var/datum/mind/traitor_mind in GLOB.traitors.current_antagonists)
-				if(traitor_mind.current)
-					// TODO: Update to new antagonist system.
-					var/I = image('icons/mob/mob.dmi', loc = traitor_mind.current, icon_state = "traitor")
-					add_client_image(I)
-			disconnect_from_ai()
-			if(mind)
+	if(syndicate && client)
+		for(var/datum/mind/traitor_mind in GLOB.traitors.current_antagonists)
+			if(traitor_mind.current)
 				// TODO: Update to new antagonist system.
-				if(!mind.special_role)
-					mind.special_role = "Traitor"
-					GLOB.traitors.current_antagonists |= mind
+				var/I = image('icons/mob/mob.dmi', loc = traitor_mind.current, icon_state = "traitor")
+				client.images += I
+		disconnect_from_ai()
+		if(mind)
+			// TODO: Update to new antagonist system.
+			if(!mind.special_role)
+				mind.special_role = "Traitor"
+				GLOB.traitors.current_antagonists |= mind
 
 	if(cells)
 		if(cell)

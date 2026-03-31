@@ -265,9 +265,9 @@
 		stop()
 		return
 
-	var/list/recipe_data = select_recipe(available_recipes, src)
+	var/datum/recipe/recipe = select_recipe(available_recipes,src)
 	var/list/cooked
-	if(!islist(recipe_data))
+	if (!recipe)
 		dirty += 1
 		if (prob(max(10, dirty * 5)))
 			if (!wzhzhzh(4))
@@ -299,7 +299,6 @@
 				I.dropInto(loc)
 			return
 	else
-		var/datum/recipe/recipe = recipe_data[1]
 		var/halftime = round(recipe.time / 20)
 		if (!wzhzhzh(halftime))
 			abort()
@@ -310,7 +309,7 @@
 			for(var/obj/item/I in cooked)
 				I.dropInto(loc)
 			return
-		cooked = recipe.make_food(src, recipe_data[2])
+		cooked = recipe.make_food(src)
 		stop()
 		if(cooked)
 			for(var/obj/item/I in cooked)

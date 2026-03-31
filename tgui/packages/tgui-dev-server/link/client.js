@@ -4,25 +4,23 @@
  * @license MIT
  */
 
-const isDev = import.meta.env.MODE !== "production";
-const DEV_SERVER_IP = import.meta.env.DEV_SERVER_IP || "127.0.0.1";
-
-let socket = null;
+let socket;
 const queue = [];
 const subscribers = [];
 
 const ensureConnection = () => {
-  if (isDev) {
+  if (process.env.NODE_ENV !== "production") {
     if (!window.WebSocket) {
       return;
     }
     if (!socket || socket.readyState === WebSocket.CLOSED) {
+      const DEV_SERVER_IP = process.env.DEV_SERVER_IP || "127.0.0.1";
       socket = new WebSocket(`ws://${DEV_SERVER_IP}:3000`);
       socket.onopen = () => {
         // Empty the message queue
         while (queue.length !== 0) {
           const msg = queue.shift();
-          if (msg) socket.send(msg);
+          socket.send(msg);
         }
       };
       socket.onmessage = (event) => {
@@ -35,7 +33,7 @@ const ensureConnection = () => {
   }
 };
 
-if (isDev) {
+if (process.env.NODE_ENV !== "production") {
   window.onunload = () => socket && socket.close();
 }
 
@@ -46,7 +44,6 @@ export const subscribe = (fn) => subscribers.push(fn);
  */
 const serializeObject = (obj) => {
   let refs = [];
-
   const primitiveReviver = (value) => {
     if (typeof value === "number" && !Number.isFinite(value)) {
       return {
@@ -60,8 +57,7 @@ const serializeObject = (obj) => {
     }
     return value;
   };
-
-  const objectReviver = (_key, value) => {
+  const objectReviver = (key, value) => {
     if (typeof value === "object") {
       if (value === null) {
         return value;
@@ -90,19 +86,18 @@ const serializeObject = (obj) => {
     }
     return primitiveReviver(value);
   };
-
   const json = JSON.stringify(obj, objectReviver);
   refs = null;
   return json;
 };
 
 export const sendMessage = (msg) => {
-  if (isDev) {
+  if (process.env.NODE_ENV !== "production") {
     const json = serializeObject(msg);
     // Send message using WebSocket
     if (window.WebSocket) {
       ensureConnection();
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (socket.readyState === WebSocket.OPEN) {
         socket.send(json);
       } else {
         // Keep only 100 latest messages in the queue
@@ -113,6 +108,7 @@ export const sendMessage = (msg) => {
       }
     } else {
       // Send message using plain HTTP request.
+      const DEV_SERVER_IP = process.env.DEV_SERVER_IP || "127.0.0.1";
       const req = new XMLHttpRequest();
       req.open("POST", `http://${DEV_SERVER_IP}:3001`, true);
       req.timeout = 250;
@@ -122,7 +118,7 @@ export const sendMessage = (msg) => {
 };
 
 export const sendLogEntry = (level, ns, ...args) => {
-  if (isDev) {
+  if (process.env.NODE_ENV !== "production") {
     try {
       sendMessage({
         type: "log",
@@ -132,36 +128,42 @@ export const sendLogEntry = (level, ns, ...args) => {
           args,
         },
       });
-    } catch (err) {
-      // Ignore errors
-    }
+    } catch (err) {}
   }
 };
 
 export const setupHotReloading = () => {
-  if (isDev && import.meta.hot && window.WebSocket) {
-    ensureConnection();
-    sendLogEntry(0, null, "setting up hot reloading");
-
-    subscribe((msg) => {
-      const { type } = msg;
-      sendLogEntry(0, null, "received", type);
-
-      if (type === "hotUpdate") {
-        sendLogEntry(0, null, "hot update received, Vite will handle it");
-      }
-    });
-
-    import.meta.hot.on("vite:beforeUpdate", (payload) => {
-      sendLogEntry(0, null, "vite:beforeUpdate", payload);
-    });
-
-    import.meta.hot.on("vite:afterUpdate", (payload) => {
-      sendLogEntry(0, null, "vite:afterUpdate", payload);
-    });
-
-    import.meta.hot.on("vite:error", (payload) => {
-      sendLogEntry(0, null, "vite:error", payload);
-    });
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.WEBPACK_HMR_ENABLED &&
+    window.WebSocket
+  ) {
+    if (module.hot) {
+      ensureConnection();
+      sendLogEntry(0, null, "setting up hot reloading");
+      subscribe((msg) => {
+        const { type } = msg;
+        sendLogEntry(0, null, "received", type);
+        if (type === "hotUpdate") {
+          const status = module.hot.status();
+          if (status !== "idle") {
+            sendLogEntry(0, null, "hot reload status:", status);
+            return;
+          }
+          module.hot
+            .check({
+              ignoreUnaccepted: true,
+              ignoreDeclined: true,
+              ignoreErrored: true,
+            })
+            .then((modules) => {
+              sendLogEntry(0, null, "outdated modules", modules);
+            })
+            .catch((err) => {
+              sendLogEntry(0, null, "reload error", err);
+            });
+        }
+      });
+    }
   }
 };

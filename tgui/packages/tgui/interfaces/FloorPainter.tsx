@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { useBackend } from "../backend";
 import { Button, ColorBox, Divider, Stack } from "../components";
 import { GameIcon } from "../components/GameIcon";

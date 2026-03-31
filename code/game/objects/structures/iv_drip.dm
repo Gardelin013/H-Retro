@@ -164,14 +164,12 @@
 	if(get_dist(src, user) > 2)
 		return
 
-	if(mode)
-		. += "The IV drip is set to inject [transfer_amount] ml of chemicals per second."
-	else
-		. += "The IV drip is set to siphon [transfer_amount] ml of blood per second."
+	. += "The IV drip is [mode ? "injecting" : "taking blood"]."
+	. += "It is set to transfer [transfer_amount]u of chemicals per cycle."
 
 	if(beaker)
 		if(beaker.reagents && beaker.reagents.total_volume)
-			. += SPAN_NOTICE("Attached is \a [beaker] with [beaker.reagents.total_volume] ml of chemicals.")
+			. += SPAN_NOTICE("Attached is \a [beaker] with [beaker.reagents.total_volume] ml of liquid.")
 		else
 			. += SPAN_NOTICE("Attached is an empty [beaker].")
 	else

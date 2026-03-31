@@ -35,6 +35,7 @@ var/const/EXTRA_COST_FACTOR = 1.25
 	path = /obj/item/reagent_containers/vessel/bucket
 	category = "General"
 
+
 /datum/autolathe/recipe/tube
 	name = "light tube"
 	path = /obj/item/light/tube
@@ -473,12 +474,6 @@ var/const/EXTRA_COST_FACTOR = 1.25
 	hidden = 1
 	category = "Arms and Ammunition"
 
-/datum/autolathe/recipe/shotgun_breaching
-	name = "ammunition (breaching, shotgun)"
-	path = /obj/item/ammo_casing/shotgun/breaching
-	hidden = 1
-	category = "Arms and Ammunition"
-
 /datum/autolathe/recipe/magazine_c45mrubber
 	name = "ammunition (.45, rubber)"
 	path = /obj/item/ammo_magazine/c45m/rubber
@@ -655,20 +650,4 @@ var/const/EXTRA_COST_FACTOR = 1.25
 /datum/autolathe/recipe/ecigcartridge
 	name = "ecigarette cartridge"
 	path = /obj/item/reagent_containers/ecig_cartridge/blank
-	category = "Devices and Components"
-
-
-/datum/autolathe/recipe/eftpos
-	name = "EFTPOS scanner"
-	path = /obj/item/device/eftpos
-	category = "Devices and Components"
-
-/datum/autolathe/recipe/tablet_chassis
-	name = "tablet computer"
-	path = /obj/item/mcu_chassis/tablet
-	category = "Devices and Components"
-
-/datum/autolathe/recipe/laptop_chassis
-	name = "laptop computer"
-	path = /obj/item/mcu_chassis/laptop
 	category = "Devices and Components"

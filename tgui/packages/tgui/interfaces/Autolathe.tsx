@@ -29,6 +29,7 @@ interface Recipe {
   name: string;
   index: number;
   category: string;
+  // eslint-disable-next-line camelcase
   can_make: boolean;
   hidden: boolean;
   required: Material[];

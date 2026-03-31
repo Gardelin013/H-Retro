@@ -61,7 +61,7 @@
 							Target = C
 							break
 
-						if(islarva(C) || issmall(C) || isanimal(C))
+						if(isalien(C) || issmall(C) || isanimal(C))
 							Target = C
 							break
 

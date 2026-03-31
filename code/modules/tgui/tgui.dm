@@ -81,6 +81,7 @@
 		window.initialize(
 			fancy = user.get_preference_value(/datum/client_preference/tgui_style) == GLOB.PREF_FANCY,
 			assets = list(
+				get_asset_datum(/datum/asset/simple/tgui_common),
 				get_asset_datum(/datum/asset/simple/tgui),
 				get_asset_datum(/datum/asset/simple/fontawesome)
 			))
@@ -239,12 +240,13 @@
 	// Pass act type messages to ui_act
 	if(type && copytext(type, 1, 5) == "act/")
 		var/act_type = copytext(type, 5)
+		log_tgui(user, "Action: [act_type] [href_list["payload"]]",
+			window = window,
+			src_object = src_object)
 		_process_status()
-
 		if(src_object.tgui_act(act_type, payload, src, state))
 			SStgui.update_uis(src_object)
-
-		return
+		return FALSE
 	switch(type)
 		if("ready")
 			send_full_update()
@@ -252,12 +254,12 @@
 		if("pingReply")
 			initialized = TRUE
 		if("suspend")
-			close(TRUE)
+			close(can_be_suspended = TRUE)
 		if("close")
-			close(FALSE)
+			close(can_be_suspended = FALSE)
 		if("log")
 			if(href_list["fatal"])
-				close(FALSE)
+				close(can_be_suspended = FALSE)
 		if("setSharedState")
 			if(status != UI_INTERACTIVE)
 				return

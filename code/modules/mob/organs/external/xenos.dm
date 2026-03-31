@@ -77,10 +77,10 @@
 	organ_tag = BP_GANGLION
 	vital = TRUE
 	relative_size = 30
-	max_damage = 100
 
-/obj/item/organ/internal/xenos/ganglion/Initialize()
-	. = ..()
+/obj/item/organ/internal/xenos/ganglion/New(mob/living/carbon/holder)
+	..()
+	max_damage = 100
 	if(species)
 		max_damage = species.total_health
 	min_bruised_damage = max_damage*0.25

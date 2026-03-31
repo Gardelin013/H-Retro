@@ -79,14 +79,6 @@
 	// Generate page html
 	var/html = SStgui.basehtml
 	html = replacetextEx(html, "\[tgui:windowId]", id)
-	html = replacetextEx(html, "\[tgui:wsToken]", SSws.issue_token(client.ckey))
-
-	var/ws_address = SSws.get_address()
-	if(ws_address == null)
-		log_tgui(client, "Error: WebSocket server is not running, cannot initialize window.", context = id)
-		return
-
-	html = replacetextEx(html, "\[tgui:wsAddress]", ws_address)
 	// Inject inline assets
 	var/assets_str = ""
 	for(var/datum/asset/asset in assets)
@@ -211,14 +203,6 @@
 /**
  * public
  *
- * Returns a tied connection to the window.
- */
-/datum/tgui_window/proc/get_connection()
-	return Z_WS_GET_TIED(src)
-
-/**
- * public
- *
  * Close the UI.
  *
  * optional can_be_suspended bool
@@ -239,11 +223,6 @@
 	release_lock()
 	status = TGUI_WINDOW_CLOSED
 	message_queue = null
-
-	var/conn_id = get_connection()
-	if(conn_id != null)
-		Z_WS_DISCONNECT(conn_id)
-
 	// Do not close the window to give user some time
 	// to read the error message.
 	if(!fatally_errored)
@@ -266,23 +245,18 @@
 	if(!force && status != TGUI_WINDOW_READY)
 		if(!message_queue)
 			message_queue = list()
-	
 		message_queue += list(message)
 		return
-	
-	var/conn_id = get_connection()
-	if(conn_id == null)
-		return
-
-	if(!Z_WS_SEND(conn_id, message))
-		log_tgui(client, "Error: Failed to send WS message", context = id)
+	client << output(message, is_browser \
+		? "[id]:update" \
+		: "[id].browser:update")
 
 /**
  * public
  *
  * Sends a raw payload to tgui window.
  *
- * required message string JSON blob to send.
+ * required message string JSON+urlencoded blob to send.
  * optional force bool Send regardless of the ready status.
  */
 /datum/tgui_window/proc/send_raw_message(message, force)
@@ -294,13 +268,9 @@
 			message_queue = list()
 		message_queue += list(message)
 		return
-
-	var/conn_id = get_connection()
-	if(conn_id == null)
-		return
-
-	if(!Z_WS_SEND(conn_id, message))
-		log_tgui(client, "Error: Failed to send WS message", context = id)
+	client << output(message, is_browser \
+		? "[id]:update" \
+		: "[id].browser:update")
 
 /**
  * public
@@ -326,53 +296,18 @@
 /datum/tgui_window/proc/flush_message_queue()
 	if(!client || !message_queue)
 		return
-	
-	var/conn_id = get_connection()
-	if(conn_id == null)
-		return
-
 	for(var/message in message_queue)
-		if(!Z_WS_SEND(conn_id, message))
-			log_tgui(client, "Error: Failed to send WS message", context = id)
-
+		client << output(message, is_browser \
+			? "[id]:update" \
+			: "[id].browser:update")
 	message_queue = null
 
-/datum/tgui_window/proc/__on_ws_text(content, addr, conn_id)
-	if(!client)
-		return FALSE
-
-	// Schedule calling of the callback on the next tick, outside of the
-	// Z_WS_TICK callstack.
-	spawn(0)
-		_on_message(content, conn_id)
-
-	return TRUE
-
-/datum/tgui_window/proc/_on_message(content, conn_id)
-	if(!client)
-		return
-
-	if(get_connection() != conn_id)
-		return
-
-	// For compatibility with code that relied on the usr set by Topic,
-	// and this is quite convenient.
-	usr = client.mob
-	var/list/C
-
-	try
-		C = json_decode(content)
-	catch
-		close(FALSE)
-		return
-
-	if(!islist(C))
-		close(FALSE)
-		return
-	
-	var/type = C["type"]
-	var/payload = C["payload"]
-
+/**
+ * private
+ *
+ * Callback for handling incoming tgui messages.
+ */
+/datum/tgui_window/proc/on_message(type, payload, href_list)
 	// Status can be READY if user has refreshed the window.
 	if(type == "ready" && status == TGUI_WINDOW_READY)
 		// Resend the assets
@@ -380,7 +315,7 @@
 			send_asset(asset)
 	// Mark this window as fatally errored which prevents it from
 	// being suspended.
-	if(type == "log" && C["fatal"])
+	if(type == "log" && href_list["fatal"])
 		fatally_errored = TRUE
 	// Mark window as ready since we received this message from somewhere
 	if(status != TGUI_WINDOW_READY)
@@ -388,14 +323,14 @@
 		flush_message_queue()
 	// Pass message to UI that requested the lock
 	if(locked && locked_by)
-		var/prevent_default = locked_by._on_message(type, payload, C)
+		var/prevent_default = locked_by._on_message(type, payload, href_list)
 		if(prevent_default)
 			return
 	// Pass message to the subscriber
 	else if(subscriber_object)
 		var/prevent_default = call(
 			subscriber_object,
-			subscriber_delegate)(type, payload, C)
+			subscriber_delegate)(type, payload, href_list)
 		if(prevent_default)
 			return
 	// If not locked, handle these message types
@@ -407,4 +342,6 @@
 		if("close")
 			close(can_be_suspended = FALSE)
 		if("openLink")
-			client << link(C["url"])
+			client << link(href_list["url"])
+		if("cacheReloaded")
+			reinitialize()

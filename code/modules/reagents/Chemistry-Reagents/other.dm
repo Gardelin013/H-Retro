@@ -230,7 +230,7 @@
 	if(!L.mind)
 		return
 	if((L.mind.vampire && !(L.mind.vampire.vamp_status & VAMP_ISTHRALL)) || is_species(L, /datum/species/golem/runic))
-		L.adjust_fire_stacks(ceil(amount / 15))
+		L.adjust_fire_stacks(amount / 15)
 		L.IgniteMob()
 
 /datum/reagent/water/holywater/touch_turf(turf/T)
@@ -291,7 +291,7 @@
 
 /datum/reagent/thermite/touch_mob(mob/living/L, amount)
 	if(istype(L))
-		L.adjust_fire_stacks(ceil(amount)) // Sweet hell that's a lot
+		L.adjust_fire_stacks(amount / 5)
 
 /datum/reagent/thermite/affect_blood(mob/living/carbon/M, alien, removed)
 	M.adjustFireLoss(3 * removed)
@@ -323,11 +323,7 @@
 		for(var/mob/living/carbon/metroid/M in T)
 			M.adjustToxLoss(rand(5, 10))
 
-/datum/reagent/space_cleaner/touch_mob(mob/living/L, amount)
-	var/mob/living/carbon/M = L
-	if(!istype(M))
-		return
-
+/datum/reagent/space_cleaner/affect_touch(mob/living/carbon/M, alien, removed)
 	if(M.r_hand)
 		M.r_hand.clean_blood()
 	if(M.l_hand)
@@ -374,7 +370,7 @@
 		M.adjustOxyLoss(-removed * 10)
 	else if(alien != IS_DIONA)
 		M.adjustToxLoss(removed * 5)
-		M.make_drugged(5)
+		M.druggy = max(M.druggy, 5)
 
 /datum/reagent/lube // TODO: spraying on borgs speeds them up
 	name = "Space Lube"
@@ -515,18 +511,19 @@
 	glass_name = "welder fuel"
 	glass_desc = "Unless you are an industrial tool, this is probably not safe for consumption."
 
-/datum/reagent/fuel/touch_turf(turf/T, amount)
-	new /obj/effect/decal/cleanable/liquid_fuel(T, amount)
+/datum/reagent/fuel/touch_turf(turf/T)
+	new /obj/effect/decal/cleanable/liquid_fuel(T, volume)
+	remove_self(volume)
 	return
 
 /datum/reagent/fuel/affect_blood(mob/living/carbon/M, alien, removed)
 	if(alien == IS_DIONA)
-		M.adjust_fire_stacks(ceil(removed))
+		M.adjust_fire_stacks(removed)
 	M.adjustToxLoss(3 * removed)
 
 /datum/reagent/fuel/touch_mob(mob/living/L, amount)
 	if(istype(L))
-		L.adjust_fire_stacks(ceil(amount / 5)) // Splashing people with welding fuel to make them easy to ignite!
+		L.adjust_fire_stacks(amount / 10) // Splashing people with welding fuel to make them easy to ignite!
 
 /datum/reagent/water/firefoam
 	name = "Firefighting foam"

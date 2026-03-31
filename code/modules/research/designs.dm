@@ -80,9 +80,6 @@ other types of metals and chemistry for reagents).
 /datum/design/item/biostorage
 	category_items = list("Robotics")
 
-/datum/design/item/augment
-	category_items = list("Augmentations")
-
 /datum/design/item/tool
 	category_items = list("Misc")
 

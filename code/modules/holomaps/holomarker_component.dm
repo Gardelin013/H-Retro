@@ -48,9 +48,8 @@
 
 	if(istype(activator))
 		unregister_signal(activator, SIGNAL_Z_CHANGED)
-		for(var/image/I in holomap_images)
-			activator?.remove_client_image(I)
-		activator?.remove_client_image(holomap_base)
+		activator?.client?.images -= holomap_images
+		activator?.client?.images -= holomap_base
 
 	if(istype(parent))
 		unregister_signal(parent, SIGNAL_ITEM_UNEQUIPPED)
@@ -71,7 +70,7 @@
 	GLOB.holocache["_\ref[src]_self"] = create_marker_image(parent_.x, parent_.y, "you", HUD_HOLOMARKER_SELF_LAYER)
 
 /datum/component/holomarker/toggleable/proc/toggle(mob/user)
-	if(!user)
+	if(!user || !user.client)
 		return
 
 	activator = user
@@ -99,7 +98,7 @@
 	holomap_base.layer = HUD_ABOVE_ITEM_LAYER
 
 	animate(holomap_base, alpha = 255, time = 5, easing = LINEAR_EASING)
-	activator.add_client_image(holomap_base)
+	activator.client.images |= holomap_base
 
 /datum/component/holomarker/toggleable/proc/deactivate()
 	toggled = FALSE
@@ -108,10 +107,9 @@
 	if(holomap_base)
 		animate(holomap_base, alpha = 0, time = 5, easing = LINEAR_EASING)
 
-	for(var/image/I in holomap_images)
-		activator?.remove_client_image(I)
+	activator?.client?.images -= holomap_images
 	spawn(5)
-		activator?.remove_client_image(holomap_base)
+		activator?.client?.images -= holomap_base
 
 	activator = null
 
@@ -125,15 +123,13 @@
 		return
 
 	if(holomap_images.len)
-		for(var/image/I in holomap_images)
-			activator.remove_client_image(I)
+		activator.client.images -= holomap_images
 		holomap_images.Cut()
 
 	handle_self_marker()
 	handle_markers()
 
-	for(var/image/I in holomap_images)
-		activator.add_client_image(I)
+	activator.client.images += holomap_images
 
 	set_next_think(world.time + 1 SECOND)
 
@@ -184,10 +180,10 @@
 
 /datum/component/holomarker/toggleable/proc/on_z_change(atom, old_turf, new_turf)
 	var/atom/new_loc = new_turf
-	if(!activator)
+	if(!activator || !activator.client)
 		return
 
-	activator.remove_client_image(holomap_base)
+	activator.client.images -= holomap_base
 
 	holomap_base = image(GLOB.holomaps[get_z(new_loc)])
 
@@ -200,7 +196,7 @@
 	holomap_base.plane = HUD_PLANE
 	holomap_base.layer = HUD_ABOVE_ITEM_LAYER
 	holomap_base.loc = activator.hud_used.holomap_obj
-	activator.add_client_image(holomap_base)
+	activator.client.images |= holomap_base
 
 /// Transmits & receives other holochips on the same frequency
 /datum/component/holomarker/toggleable/transmitting

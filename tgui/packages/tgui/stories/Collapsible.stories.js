@@ -9,6 +9,7 @@ import { BoxWithSampleText } from "./common";
 
 export const meta = {
   title: "Collapsible",
+  // eslint-disable-next-line react/display-name
   render: () => <Story />,
 };
 

@@ -23,15 +23,12 @@ import {
   TextArea,
 } from "tgui/components";
 import { ChatPageSettings } from "../chat";
-import { ttsEngine } from "../chat/tts";
-import { MESSAGE_TYPES } from "../chat/constants";
 import {
   loadSettingsFromDisk,
   rebuildChat,
   resetSettings,
   saveChatToDisk,
   saveSettingsToDisk,
-  updateTtsSettings,
 } from "../chat/actions";
 import { THEMES } from "../themes";
 import { changeSettingsTab, updateSettings } from "./actions";
@@ -54,7 +51,7 @@ export const SettingsPanel = (props, context) => {
                   dispatch(
                     changeSettingsTab({
                       tabId: tab.id,
-                    }),
+                    })
                   )
                 }
               >
@@ -67,7 +64,6 @@ export const SettingsPanel = (props, context) => {
       <Stack.Item grow={1} basis={0}>
         {activeTab === "general" && <SettingsGeneral />}
         {activeTab === "chatPage" && <ChatPageSettings />}
-        {activeTab === "tts" && <TtsSettings />}
         {activeTab === "backgroundImage" && <BackgroundImageSettings />}
         {activeTab === "css" && <CustomCssSettings />}
       </Stack.Item>
@@ -100,7 +96,7 @@ export const SettingsGeneral = (props, context) => {
               dispatch(
                 updateSettings({
                   theme: value,
-                }),
+                })
               )
             }
           />
@@ -116,7 +112,7 @@ export const SettingsGeneral = (props, context) => {
                     dispatch(
                       updateSettings({
                         fontFamily: value,
-                      }),
+                      })
                     )
                   }
                 />
@@ -127,7 +123,7 @@ export const SettingsGeneral = (props, context) => {
                     dispatch(
                       updateSettings({
                         fontFamily: value,
-                      }),
+                      })
                     )
                   }
                 />
@@ -159,7 +155,7 @@ export const SettingsGeneral = (props, context) => {
               dispatch(
                 updateSettings({
                   fontSize: value,
-                }),
+                })
               )
             }
           />
@@ -177,7 +173,7 @@ export const SettingsGeneral = (props, context) => {
               dispatch(
                 updateSettings({
                   lineHeight: value,
-                }),
+                })
               )
             }
           />
@@ -203,7 +199,7 @@ export const SettingsGeneral = (props, context) => {
                   dispatch(
                     loadSettingsFromDisk({
                       data: pastedJson,
-                    }),
+                    })
                   )
                 }
                 icon="upload"
@@ -228,7 +224,7 @@ export const SettingsGeneral = (props, context) => {
                 dispatch(
                   updateSettings({
                     highlightColor: value,
-                  }),
+                  })
                 )
               }
             />
@@ -241,7 +237,7 @@ export const SettingsGeneral = (props, context) => {
             dispatch(
               updateSettings({
                 highlightText: value,
-              }),
+              })
             )
           }
         />
@@ -266,201 +262,6 @@ export const SettingsGeneral = (props, context) => {
       >
         Reset Chat
       </Button.Confirm>
-    </Section>
-  );
-};
-
-export const TtsSettings = (props, context) => {
-  const dispatch = useDispatch(context);
-
-  const [settings, setSettings] = useLocalState(
-    context,
-    "ttsSettings",
-    ttsEngine.getSettings(),
-  );
-
-  const [voiceList, setVoiceList] = useLocalState(
-    context,
-    "ttsVoiceList",
-    ttsEngine.getVoices().map((v) => v.name),
-  );
-
-  const refreshVoices = () => {
-    setVoiceList(ttsEngine.getVoices().map((v) => v.name));
-  };
-
-  const update = (partial) => {
-    const next = { ...settings, ...partial };
-    setSettings(next);
-    dispatch(updateTtsSettings(partial));
-  };
-
-  const toggleMessageType = (msgType) => {
-    const current = settings.ttsMessageTypes || [];
-    const next = current.includes(msgType)
-      ? current.filter((t) => t !== msgType)
-      : [...current, msgType];
-    update({ ttsMessageTypes: next });
-  };
-
-  if (!ttsEngine.isAvailable()) {
-    return (
-      <Section>
-        <Box color="bad" fontSize="1.2em" textAlign="center" mt={2}>
-          Text-to-Speech is not supported in this browser.
-        </Box>
-      </Section>
-    );
-  }
-
-  const voiceOptions = ["(Default)", ...voiceList];
-
-  return (
-    <Section>
-      <LabeledList>
-        <LabeledList.Item label="Enable TTS">
-          <Button.Checkbox
-            checked={settings.enabled}
-            onClick={() => update({ enabled: !settings.enabled })}
-          >
-            {settings.enabled ? "On" : "Off"}
-          </Button.Checkbox>
-        </LabeledList.Item>
-        <LabeledList.Item label="Volume">
-          <NumberInput
-            width="5em"
-            step={5}
-            stepPixelSize={5}
-            minValue={0}
-            maxValue={100}
-            value={Math.round(settings.volume * 100)}
-            unit="%"
-            onChange={(e, value) => update({ volume: value / 100 })}
-          />
-        </LabeledList.Item>
-        <LabeledList.Item label="Speed">
-          <NumberInput
-            width="5em"
-            step={0.1}
-            stepPixelSize={5}
-            minValue={0.1}
-            maxValue={10}
-            value={settings.rate}
-            format={(v) => toFixed(v, 1)}
-            onChange={(e, value) => update({ rate: value })}
-          />
-        </LabeledList.Item>
-        <LabeledList.Item label="Pitch">
-          <NumberInput
-            width="5em"
-            step={0.1}
-            stepPixelSize={5}
-            minValue={0}
-            maxValue={2}
-            value={settings.pitch}
-            format={(v) => toFixed(v, 1)}
-            onChange={(e, value) => update({ pitch: value })}
-          />
-        </LabeledList.Item>
-      </LabeledList>
-      <Divider />
-      <Flex align="center" mb={1}>
-        <Flex.Item grow={1}>
-          <Box bold>Voices</Box>
-        </Flex.Item>
-        <Flex.Item>
-          <Button icon="sync" onClick={refreshVoices}>
-            Refresh
-          </Button>
-        </Flex.Item>
-      </Flex>
-      {voiceList.length === 0 ? (
-        <Box color="average" mb={1}>
-          No voices found. Try clicking Refresh.
-        </Box>
-      ) : (
-        <LabeledList>
-          <LabeledList.Item label="Male voice">
-            <Dropdown
-              width="15em"
-              selected={settings.maleVoiceName || "(Default)"}
-              options={voiceOptions}
-              onSelected={(value) =>
-                update({
-                  maleVoiceName: value === "(Default)" ? "" : value,
-                })
-              }
-            />
-          </LabeledList.Item>
-          <LabeledList.Item label="Female voice">
-            <Dropdown
-              width="15em"
-              selected={settings.femaleVoiceName || "(Default)"}
-              options={voiceOptions}
-              onSelected={(value) =>
-                update({
-                  femaleVoiceName: value === "(Default)" ? "" : value,
-                })
-              }
-            />
-          </LabeledList.Item>
-          <LabeledList.Item label="Other voice">
-            <Dropdown
-              width="15em"
-              selected={settings.unknownVoiceName || "(Default)"}
-              options={voiceOptions}
-              onSelected={(value) =>
-                update({
-                  unknownVoiceName: value === "(Default)" ? "" : value,
-                })
-              }
-            />
-          </LabeledList.Item>
-        </LabeledList>
-      )}
-      <Divider />
-      <Box bold mb={1}>
-        Message types to speak
-      </Box>
-      {MESSAGE_TYPES.filter(
-        (typeDef) => !typeDef.important && !typeDef.type.startsWith("internal"),
-      ).map((typeDef) => (
-        <Button.Checkbox
-          key={typeDef.type}
-          checked={(settings.ttsMessageTypes || []).includes(typeDef.type)}
-          onClick={() => toggleMessageType(typeDef.type)}
-        >
-          {typeDef.name}
-        </Button.Checkbox>
-      ))}
-      <Divider />
-      <Button
-        icon="play"
-        onClick={() =>
-          ttsEngine.speak("This is a test of text to speech.", null)
-        }
-      >
-        Test
-      </Button>
-      <Button
-        icon="play"
-        ml={1}
-        onClick={() => ttsEngine.speak("This is a male voice test.", "male")}
-      >
-        Test Male
-      </Button>
-      <Button
-        icon="play"
-        ml={1}
-        onClick={() =>
-          ttsEngine.speak("This is a female voice test.", "female")
-        }
-      >
-        Test Female
-      </Button>
-      <Button icon="stop" color="red" ml={1} onClick={() => ttsEngine.stop()}>
-        Stop
-      </Button>
     </Section>
   );
 };
@@ -493,7 +294,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     url: value,
                   },
-                }),
+                })
               )
             }
           />
@@ -511,7 +312,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     opaque: value,
                   },
-                }),
+                })
               )
             }
           />
@@ -527,7 +328,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     repeat: REPEAT_MODE.no,
                   },
-                }),
+                })
               )
             }
           />
@@ -541,7 +342,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     repeat: REPEAT_MODE.repeat,
                   },
-                }),
+                })
               )
             }
           />
@@ -555,7 +356,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     repeat: REPEAT_MODE.repeatx,
                   },
-                }),
+                })
               )
             }
           />
@@ -569,7 +370,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     repeat: REPEAT_MODE.repeaty,
                   },
-                }),
+                })
               )
             }
           />
@@ -585,7 +386,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     size: SIZE_MODE.cover,
                   },
-                }),
+                })
               )
             }
           />
@@ -599,7 +400,7 @@ export const BackgroundImageSettings = (props, context) => {
                     ...background,
                     size: SIZE_MODE.contain,
                   },
-                }),
+                })
               )
             }
           />
@@ -623,7 +424,7 @@ export const CustomCssSettings = (props, context) => {
           dispatch(
             updateSettings({
               customCss: value,
-            }),
+            })
           )
         }
       />

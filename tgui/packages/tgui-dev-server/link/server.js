@@ -7,7 +7,7 @@
 import { createLogger, directLog } from "common/logging.js";
 import http from "http";
 import { inspect } from "util";
-import { WebSocketServer} from "ws";
+import WebSocket from "ws";
 import { retrace, loadSourceMaps } from "./retrace.js";
 
 const logger = createLogger("link");
@@ -29,7 +29,7 @@ class LinkServer {
   // WebSocket-based client link
   setupWebSocketLink() {
     const port = 3000;
-    this.wss = new WebSocketServer({ port });
+    this.wss = new WebSocket.Server({ port });
     this.wss.on("connection", (ws) => {
       logger.log("client connected");
       ws.on("message", (json) => {

@@ -55,6 +55,7 @@ SUBSYSTEM_DEF(atoms)
 				CHECK_TICK
 
 	report_progress("Initialized [count] atom\s")
+	pass(count)
 
 	init_state = INITIALIZATION_INNEW_REGULAR
 

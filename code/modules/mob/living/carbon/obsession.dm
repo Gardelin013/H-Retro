@@ -20,8 +20,8 @@
 			I.loc = L
 			I.color = COLOR_BLOOD_HUMAN
 
+			client.images += I
 			images += I
-			add_client_image(I)
 
 		while (obsession_time)
 			obsession_time = max(0, obsession_time - 1 SECOND)
@@ -30,5 +30,4 @@
 		Sleeping(5)
 		sleep(3 SECOND)
 		clear_fullscreen("red")
-		for(var/image/I in images)
-			remove_client_image(I)
+		client.images -= images

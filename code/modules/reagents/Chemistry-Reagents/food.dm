@@ -168,7 +168,7 @@
 	M.add_nutrition(nutriment_factor * removed)
 
 /datum/reagent/nutriment/protein/egg // Also bad for skrell.
-	name = "egg protein"
+	name = "egg yolk"
 
 	taste_description = "slime"
 
@@ -178,20 +178,7 @@
 	ingest_absorbability = 0.2
 	digest_absorbability = 0.75
 
-	cooked_path = /datum/reagent/nutriment/protein/egg/cooked
-
-/datum/reagent/nutriment/protein/egg/cooked
-	name = "cooked egg protein"
-
-	taste_description = "eggs"
-
-	reagent_state = SOLID
-	color = "#ffe17f"
-
-	ingest_absorbability = 0.2
-	digest_absorbability = 1.0
-
-	cooked_path = null
+	cooked_path = /datum/reagent/nutriment/protein/cooked
 
 /datum/reagent/nutriment/honey
 	name = "Honey"
@@ -235,9 +222,7 @@
 
 /datum/reagent/nutriment/flour/touch_turf(turf/simulated/T)
 	if(!istype(T, /turf/space))
-		if(!locate(/obj/effect/decal/cleanable/flour, T))
-			new /obj/effect/decal/cleanable/flour(T)
-
+		new /obj/effect/decal/cleanable/flour(T)
 		if(T.wet > 1)
 			T.wet = min(T.wet, 1)
 		else
@@ -662,8 +647,7 @@
 	flags = IGNORE_MOB_SIZE
 
 /datum/reagent/magical_custard/affect_digest(mob/living/carbon/M, alien, removed)
-	M.add_chemical_effect(CE_BRUTE_REGEN, 2.5)
-	M.add_chemical_effect(CE_BURN_REGEN, 2.5)
+	M.heal_organ_damage(2.5 * removed, 2.5 * removed)
 	M.adjustToxLoss(-2.5 * removed)
 
 /datum/reagent/astrotame

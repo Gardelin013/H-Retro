@@ -15,6 +15,7 @@ interface Player {
 
 interface InputData {
   title: string;
+  // eslint-disable-next-line camelcase
   is_gameover: number;
   enemy: Enemy;
   player: Player;

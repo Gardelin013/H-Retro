@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { useBackend } from "../backend";
 import { Window } from "../layouts";
 import { Button, Section, ProgressBar, LabeledList } from "../components";

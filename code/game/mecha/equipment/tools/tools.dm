@@ -60,9 +60,9 @@
 		if(M.stat > 1)
 			return
 		if(chassis.occupant.a_intent == I_HURT)
-			M.take_overall_damage(dam_force, spread_damage = FALSE, check_armor = "melee")
+			M.take_overall_damage(dam_force)
 			M.adjustOxyLoss(round(dam_force/2))
-			M.update_health()
+			M.updatehealth()
 			occupant_message(SPAN("warning", "You squeeze [target] with [src.name]. Something cracks."))
 			chassis.visible_message(SPAN("warning", "[chassis] squeezes [target]."))
 			playsound(chassis, 'sound/effects/fighting/crunch5.ogg', 100, 1)

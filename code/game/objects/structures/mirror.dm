@@ -71,7 +71,7 @@
 	else
 		visible_message("<span class='warning'>[user] hits [src] with [I]!</span>")
 		playsound(src.loc, GET_SFX(SFX_GLASS_HIT), 70, 1)
-	I.set_cooldown()
+	user.setClickCooldown(I.update_attack_cooldown())
 	user.do_attack_animation(src)
 
 /obj/structure/mirror/attack_generic(mob/user, damage)

@@ -163,9 +163,8 @@ be able to influence the host through various commands.
 	return host.whisper(message)
 
 // Make the host do things
-/mob/living/parasite/meme/me_verb(message as text|null)
+/mob/living/parasite/meme/me_verb(message as text)
 	set name = "Me"
-
 	if(dormant)
 		to_chat(usr, "\red You're dormant!")
 		return
@@ -347,7 +346,7 @@ be able to influence the host through various commands.
 
 	spawn
 		var/mob/living/carbon/human/host = src.host
-		host.make_drugged(50)
+		host.druggy = max(host.druggy, 50)
 		host.slurring = max(host.slurring, 10)
 
 		to_chat(usr, "<b>You stimulate [host.name]'s brain, injecting waves of endorphines and dopamine into the tissue. They should now forget all their worries, particularly relating to you, for around a minute.</b>")

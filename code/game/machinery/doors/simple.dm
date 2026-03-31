@@ -82,13 +82,13 @@
 /obj/machinery/door/unpowered/simple/close(forced = 0)
 	if(!can_close(forced))
 		return
-	playsound(loc, material.dooropen_noise, 100, 1)
+	playsound(src.loc, material.dooropen_noise, 100, 1)
 	..()
 
 /obj/machinery/door/unpowered/simple/open(forced = 0)
 	if(!can_open(forced))
 		return
-	playsound(loc, material.dooropen_noise, 100, 1)
+	playsound(src.loc, material.dooropen_noise, 100, 1)
 	..()
 
 /obj/machinery/door/unpowered/simple/set_broken(new_state)
@@ -247,7 +247,7 @@
 	..(newloc, MATERIAL_RESIN, complexity)
 
 /obj/machinery/door/unpowered/simple/resin/allowed(mob/M)
-	if(istype(M, /mob/living/carbon/larva/xenomorph))
+	if(istype(M, /mob/living/carbon/alien/larva))
 		return TRUE
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M

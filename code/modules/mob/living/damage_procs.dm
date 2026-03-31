@@ -10,11 +10,8 @@
 */
 /mob/living/proc/apply_damage(damage = 0,damagetype = BRUTE, def_zone = null, blocked = 0, damage_flags = 0, used_weapon = null)
 	if(status_flags & GODMODE)
-		return FALSE
-
-	if(!damage || (blocked >= 100))
-		return FALSE
-
+		return 0
+	if(!damage || (blocked >= 100))	return 0
 	switch(damagetype)
 		if(BRUTE)
 			adjustBruteLoss(damage * blocked_mult(blocked))
@@ -32,8 +29,8 @@
 		if(ELECTROCUTE)
 			electrocute_act(damage, used_weapon, 1.0, def_zone)
 
-	update_health()
-	return TRUE
+	updatehealth()
+	return 1
 
 
 /mob/living/proc/apply_damages(brute = 0, burn = 0, tox = 0, oxy = 0, clone = 0, halloss = 0, def_zone = null, blocked = 0, damage_flags = 0)
@@ -70,7 +67,7 @@
 			eye_blurry = max(eye_blurry, effect * blocked_mult(blocked))
 		if(DROWSY)
 			drowsyness = max(drowsyness, effect * blocked_mult(blocked))
-	update_health()
+	updatehealth()
 	return 1
 
 

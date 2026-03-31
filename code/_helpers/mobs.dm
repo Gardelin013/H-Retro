@@ -13,9 +13,6 @@
 /mob/get_active_item()
 	return get_active_hand()
 
-/mob/get_inactive_item()
-	return get_inactive_hand()
-
 /mob/get_mob()
 	return src
 
@@ -131,7 +128,7 @@
 /proc/get_exposed_defense_zone(atom/movable/target)
 	return pick(BP_HEAD, BP_L_HAND, BP_R_HAND, BP_L_FOOT, BP_R_FOOT, BP_L_ARM, BP_R_ARM, BP_L_LEG, BP_R_LEG, BP_CHEST, BP_GROIN)
 
-/proc/do_mob(atom/movable/affecter, mob/target, time = 30, target_zone = 0, uninterruptible = 0, progress = 1, incapacitation_flags = INCAPACITATION_DEFAULT, can_multitask = FALSE, datum/callback/extra_checks, rightclicked = FALSE)
+/proc/do_mob(atom/movable/affecter, mob/target, time = 30, target_zone = 0, uninterruptible = 0, progress = 1, incapacitation_flags = INCAPACITATION_DEFAULT, can_multitask = FALSE, datum/callback/extra_checks)
 	if(!affecter || !target)
 		return FALSE
 
@@ -148,18 +145,12 @@
 	var/user_loc = affecter.loc
 	var/target_loc = target.loc
 
-	var/drifting = FALSE
-	if(user.is_space_movement_permitted() == SPACE_MOVE_FORBIDDEN && user.inertia_dir)
-		drifting = TRUE
+	var/holding = affecter.get_active_item()
 
-	if(isliving(user))
+	if(istype(user,/mob/living))
 		var/mob/living/L = user
 		for(var/datum/modifier/actionspeed/ASM in L.modifiers)
 			time = time * ASM.actionspeed_coefficient
-		if(L.rightclicked)
-			rightclicked = TRUE
-
-	var/holding = rightclicked ? affecter.get_inactive_item() : affecter.get_active_item()
 
 	var/datum/progressbar/progbar
 	if(is_mob_type && progress)
@@ -182,11 +173,7 @@
 		if(uninterruptible)
 			continue
 
-		if(drifting && !affecter.inertia_dir)
-			drifting = FALSE
-			user_loc = affecter.loc
-
-		if(QDELETED(affecter) || (is_mob_type && user.incapacitated(incapacitation_flags)) || (!drifting && affecter.loc != user_loc))
+		if(!affecter || (is_mob_type && user.incapacitated(incapacitation_flags)) || affecter.loc != user_loc)
 			. = 0
 			break
 
@@ -194,15 +181,9 @@
 			. = 0
 			break
 
-		// Not checking via /has_in_hands() since we want to be able to conveniently abort the action by handswapping.
-		if(!rightclicked)
-			if(affecter.get_active_item() != holding)
-				. = 0
-				break
-		else
-			if(affecter.get_inactive_item() != holding)
-				. = 0
-				break
+		if(affecter.get_active_item() != holding)
+			. = 0
+			break
 
 		if(target_zone && affecter.get_selected_zone() != target_zone)
 			. = 0
@@ -247,11 +228,7 @@
 
 	var/atom/original_loc = user.loc
 
-	var/drifting = FALSE
-	if(user.is_space_movement_permitted() == SPACE_MOVE_FORBIDDEN && user.inertia_dir)
-		drifting = TRUE
-
-	var/holding = user.get_clicking_hand()
+	var/holding = user.get_active_hand()
 
 	if(istype(user,/mob/living))
 		var/mob/living/L = user
@@ -267,14 +244,10 @@
 	. = 1
 	while (world.time < endtime)
 		stoplag(1)
-		if(progress)
+		if (progress)
 			progbar.update(world.time - starttime)
 
-		if(drifting && !user.inertia_dir)
-			drifting = FALSE
-			original_loc = user.loc
-
-		if(QDELETED(user) || user.incapacitated(incapacitation_flags)|| (!drifting && user.loc != original_loc && !can_move) || (same_direction && user.dir != original_dir))
+		if(!user || user.incapacitated(incapacitation_flags) || (user.loc != original_loc && !can_move) || (same_direction && user.dir != original_dir))
 			. = 0
 			break
 
@@ -283,7 +256,7 @@
 			break
 
 		if(needhand)
-			if(!user.has_in_hands(holding))
+			if(user.get_active_hand() != holding)
 				. = 0
 				break
 
@@ -440,5 +413,5 @@
 	if(!target_zone)
 		return
 
-	var/obj/item/organ/O = target.external_organs_by_name[target_zone]
+	var/obj/item/organ/O = target.organs_by_name[target_zone]
 	return O ? O.name : target_zone

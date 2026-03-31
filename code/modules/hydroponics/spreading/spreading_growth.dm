@@ -12,11 +12,13 @@
 	var/list/zlevel_neighbors = list()
 
 	var/turf/start = loc
-	if(isturf(start))
-		if(start.CanZPass(src, DOWN))
-			zlevel_neighbors += GetBelow(loc)
-		if(start.CanZPass(src, UP))
-			zlevel_neighbors += GetAbove(loc)
+	var/turf/up = GetAbove(loc)
+	var/turf/down = GetBelow(loc)
+
+	if(start && start.CanZPass(src, DOWN))
+		zlevel_neighbors += down
+	if(up && up.CanZPass(src, UP))
+		zlevel_neighbors += up
 
 	return zlevel_neighbors
 

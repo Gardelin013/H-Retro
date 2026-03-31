@@ -16,7 +16,6 @@
 	min_age = 18
 	max_age = 100
 	gluttonous = GLUT_TINY
-	remains_type = /obj/item/remains/human
 
 	body_builds = list(
 		new /datum/body_build,
@@ -51,7 +50,7 @@
 	if(!H.restrained() && H.shock_stage < 40 && prob(3))
 		var/maxdam = 0
 		var/obj/item/organ/external/damaged_organ = null
-		for(var/obj/item/organ/external/E in H.external_organs)
+		for(var/obj/item/organ/external/E in H.organs)
 			if(!E.can_feel_pain()) continue
 			var/dam = E.get_damage()
 			// make the choice of the organ depend on damage,
@@ -155,7 +154,7 @@
 
 	sexybits_location = BP_GROIN
 
-	xenomorph_type = /mob/living/carbon/larva/xenomorph/feral
+	xenomorph_type = /mob/living/carbon/alien/larva/feral
 
 /datum/species/tajaran/equip_survival_gear(mob/living/carbon/human/H)
 	..()
@@ -181,7 +180,6 @@
 	icobase = 'icons/mob/human_races/r_skrell.dmi'
 	primitive_form = "Neaera"
 	hair_key = SPECIES_SKRELL
-	default_h_style = "Short Headtails"
 	unarmed_types = list(/datum/unarmed_attack/punch)
 	blurb = "An amphibious species, Skrell come from the star system known as Qerr'Vallis, which translates to 'Star of \
 	the royals' or 'Light of the Crown'.<br/><br/>Skrell are a highly advanced and logical race who live under the rule \
@@ -254,7 +252,7 @@
 		BP_R_FOOT = list("path" = /obj/item/organ/external/foot/right)
 		)
 
-	xenomorph_type = /mob/living/carbon/larva/xenomorph/vile
+	xenomorph_type = /mob/living/carbon/alien/larva/vile
 
 /datum/species/diona
 	name = SPECIES_DIONA
@@ -357,7 +355,7 @@
 		return
 
 	spawn(1) // So it has time to be thrown about by the gib() proc.
-		var/mob/living/carbon/larva/diona/D = new(target)
+		var/mob/living/carbon/alien/diona/D = new(target)
 		var/datum/ghosttrap/plant/P = get_ghost_trap("living plant")
 		P.request_player(D, "A diona nymph has split off from its gestalt. ")
 		spawn(60)
@@ -367,10 +365,10 @@
 
 #define DIONA_LIMB_DEATH_COUNT 9
 /datum/species/diona/handle_death_check(mob/living/carbon/human/H)
-	var/lost_limb_count = has_limbs.len - H.external_organs.len
+	var/lost_limb_count = has_limbs.len - H.organs.len
 	if(lost_limb_count >= DIONA_LIMB_DEATH_COUNT)
 		return TRUE
-	for(var/thing in H.external_organs)
+	for(var/thing in H.organs)
 		var/obj/item/organ/external/E = thing
 		if(E && E.is_stump())
 			lost_limb_count++
@@ -378,7 +376,7 @@
 #undef DIONA_LIMB_DEATH_COUNT
 
 /datum/species/diona/can_understand(mob/other)
-	var/mob/living/carbon/larva/diona/D = other
+	var/mob/living/carbon/alien/diona/D = other
 	if(istype(D))
 		return 1
 	return 0
@@ -396,7 +394,7 @@
 /datum/species/diona/handle_death(mob/living/carbon/human/H)
 
 	if(H.isSynthetic())
-		var/mob/living/carbon/larva/diona/S = new(get_turf(H))
+		var/mob/living/carbon/alien/diona/S = new(get_turf(H))
 
 		if(H.mind)
 			H.mind.transfer_to(S)
@@ -412,7 +410,7 @@
 	if(H.InStasis() || H.is_ic_dead())
 		return
 	if(H.nutrition < 10)
-		H.take_overall_damage(1, 0, 0, "Cellular Collapse", FALSE)
+		H.take_overall_damage(2,0)
 	else if(H.innate_heal)
 		// Heals normal damage.
 		if(H.getBruteLoss())
@@ -423,7 +421,7 @@
 			H.remove_nutrition(2)
 
 		if(prob(10) && H.nutrition > 200 && !H.getBruteLoss() && !H.getFireLoss())
-			var/obj/item/organ/external/head/D = H.external_organs_by_name["head"]
+			var/obj/item/organ/external/head/D = H.organs_by_name["head"]
 			if(D.status & ORGAN_DISFIGURED)
 				D.status &= ~ORGAN_DISFIGURED
 				H.remove_nutrition(20)
@@ -437,7 +435,7 @@
 
 		if(prob(10) && H.nutrition > 70)
 			for(var/limb_type in has_limbs)
-				var/obj/item/organ/external/E = H.external_organs_by_name[limb_type]
+				var/obj/item/organ/external/E = H.organs_by_name[limb_type]
 				if(E && !E.is_usable())
 					E.removed()
 					qdel(E)
@@ -450,6 +448,10 @@
 					to_chat(H, SPAN("notice", "Some of your nymphs split and hurry to reform your [O.name]."))
 					H.remove_nutrition(60)
 					H.update_body()
+				else
+					for(var/datum/wound/W in E.wounds)
+						if(W.wound_damage() == 0 && prob(50))
+							E.wounds -= W
 
 /datum/species/diona/is_eligible_for_antag_spawn(antag_id)
 	return FALSE

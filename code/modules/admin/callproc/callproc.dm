@@ -36,6 +36,8 @@
 				return
 		if("Cancel")
 			return
+		if("No")
+			pass()
 
 	callproc_targetpicked(targetselected, target)
 
@@ -151,6 +153,8 @@
 							return CANCEL
 					if("Cancel")
 						return CANCEL
+					if("No")
+						pass()
 				var/datum/callproc/CP = new(C)
 				current = CP.callproc(targetselected, target)
 				if(isnull(current)) return CANCEL
@@ -196,14 +200,20 @@
 				if(!M) return
 				current = get_area(M)
 				if(!current)
-					if(alert("\The [M] appears to not have an area; do you want to pass null instead?",, "Yes", "Cancel") == "Cancel")
-						return CANCEL
+					switch(alert("\The [M] appears to not have an area; do you want to pass null instead?",, "Yes", "Cancel"))
+						if("Yes")
+							pass()
+						if("Cancel")
+							return CANCEL
 
 			if("marked datum")
 				current = C.holder.marked_datum()
 				if(!current)
-					if(alert("You do not currently have a marked datum; do you want to pass null instead?",, "Yes", "Cancel") == "Cancel")
-						return CANCEL
+					switch(alert("You do not currently have a marked datum; do you want to pass null instead?",, "Yes", "Cancel"))
+						if("Yes")
+							pass()
+						if("Cancel")
+							return CANCEL
 
 			if("click on atom")
 				waiting_for_click = 1

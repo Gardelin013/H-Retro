@@ -18,12 +18,9 @@ else if(!istext(variable)) { CRASH("Trying to send non-text content") }
 		// FIXME: These flags are now pointless and have no effect
 		handle_whitespace = TRUE,
 		trailing_newline = TRUE,
-		confidential = FALSE,
-		gender = null)
+		confidential = FALSE)
 	if(!target || (!html && !text))
 		return
-	// TODO: fix gender leaking
-	gender = gender ? "neuter" : null
 	if(target == world)
 		target = GLOB.clients
 
@@ -40,7 +37,6 @@ else if(!istext(variable)) { CRASH("Trying to send non-text content") }
 		html = replacetext(html, GLOB.pua, "")
 		message["html"] = html
 	if(avoid_highlighting) message["avoidHighlighting"] = avoid_highlighting
-	if(gender) message["gender"] = gender
 	var/message_blob = TGUI_CREATE_MESSAGE("chat/message", message)
 	var/message_html = message_to_html(message)
 	if(islist(target))
@@ -68,14 +64,6 @@ else if(!istext(variable)) { CRASH("Trying to send non-text content") }
  *     type = MESSAGE_TYPE_INFO,
  *     html = "You have found <strong>[object]</strong>")
  * ```
- *
- * For speech messages, pass gender for TTS voice selection:
- * ```
- * to_chat(listener,
- *     type = MESSAGE_TYPE_LOCALCHAT,
- *     html = "<span class='say'>[src] says, \"[text]\"</span>",
- *     gender = src.gender)
- * ```
  */
 /proc/to_chat(target, html,
 		type,
@@ -84,12 +72,9 @@ else if(!istext(variable)) { CRASH("Trying to send non-text content") }
 		// FIXME: These flags are now pointless and have no effect
 		handle_whitespace = TRUE,
 		trailing_newline = TRUE,
-		confidential = FALSE,
-		gender = null)
-	// TODO: fix gender leaking
-	gender = gender ? "neuter" : null
+		confidential = FALSE)
 	if(Master.current_runlevel == RUNLEVEL_INIT || !SSchat?.initialized)
-		to_chat_immediate(target, html, type, text, gender = gender)
+		to_chat_immediate(target, html, type, text)
 		return
 	if(!target || (!html && !text))
 		return
@@ -116,7 +101,6 @@ else if(!istext(variable)) { CRASH("Trying to send non-text content") }
 		html = replacetext(html, GLOB.pua, "")
 		message["html"] = html
 	if(avoid_highlighting) message["avoidHighlighting"] = avoid_highlighting
-	if(gender) message["gender"] = gender
 	SSchat.queue(target, message)
 
 #undef SANITIZE

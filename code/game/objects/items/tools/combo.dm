@@ -94,7 +94,7 @@
 	..()
 
 /obj/item/combotool/advtool/attack_hand(mob/user)
-	if(!user.has_in_passive_hand(src))
+	if(src != user.get_inactive_hand())
 		return ..()
 
 	if(!src.contents.len)

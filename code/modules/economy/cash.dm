@@ -52,13 +52,6 @@
 	if(icon_state)
 		return list(icon_state)
 
-/obj/item/spacecash/ewallet/proc/deduct(amount)
-	worth -= amount
-	if(worth <= 0)
-		qdel(src)
-	else
-		update_icon()
-
 /obj/item/spacecash/bundle
 	name = "pile of credits"
 	icon_state = ""

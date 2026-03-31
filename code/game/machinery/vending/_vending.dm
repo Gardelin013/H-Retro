@@ -246,7 +246,7 @@
 	else if(W.force >= 10)
 		take_damage(W.force)
 		user.visible_message(SPAN("danger", "\The [src] has been [pick(W.attack_verb)] with [W] by [user]!"))
-		W.set_cooldown()
+		user.setClickCooldown(W.update_attack_cooldown())
 		user.do_attack_animation(src)
 		obj_attack_sound(W)
 		shake_animation(stime = 4)
@@ -621,7 +621,7 @@
 
 		if(prob(diona_spawn_chance)) //Hehehe
 			var/turf/T = get_turf(src)
-			var/mob/living/carbon/larva/diona/S = new(T)
+			var/mob/living/carbon/alien/diona/S = new(T)
 			visible_message(SPAN("notice", "\The [src] makes an odd grinding noise before coming to a halt as \a [S.name] slurmps out from the receptacle."))
 		else //Just a normal vend, then
 			R.get_product(get_turf(src), user)
@@ -722,12 +722,6 @@
 		pixel_y = initial(pixel_y)
 	update_icon()
 
-/obj/machinery/vending/power_change()
-	var/oldstat = stat
-	. = ..()
-	if((oldstat & NOPOWER) && !(stat & NOPOWER) && !(stat & (BROKEN | POWEROFF)))
-		playsound(loc, 'sound/machines/vending/vendomat_on.ogg', 45, 1)
-
 //Oh no we're malfunctioning!  Dump out some product and break.
 /obj/machinery/vending/proc/malfunction()
 	for(var/datum/stored_items/vending_products/R in cartridge.product_records)
@@ -749,7 +743,7 @@
 			break
 	if(!throw_item)
 		return 0
-	throw_item.throw_at(target, rand(1, 3))
+	throw_item.throw_at(target, rand(1, 3), null, src)
 	visible_message(SPAN("warning", "\The [src] launches \a [throw_item] at \the [target]!"))
 	return 1
 

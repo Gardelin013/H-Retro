@@ -99,7 +99,8 @@
 				do_attack_animation(H)
 				return
 
-		H.apply_damage(rand(1, 2), BRUTE, limb.organ_tag, blocked)
+		if(H.apply_damage(rand(1, 2), BRUTE, limb.organ_tag, blocked) && !BP_IS_ROBOTIC(limb) && prob(70 - blocked))
+			limb.germ_level += rand(75, 150)
 
 		visible_message(SPAN("danger",  "[src] bites [H]'s [organ_name_by_zone(H, limb.organ_tag)]!"),
 						SPAN("warning", "You bite [H]'s [organ_name_by_zone(H, limb.organ_tag)]!"))

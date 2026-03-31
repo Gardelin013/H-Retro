@@ -26,13 +26,17 @@
 	var/drops_debris = 1
 	var/m_overlay = 0
 
-/obj/item/material/Initialize(mapload, material_key)
-	. = ..(mapload)
-
-	set_material(material_key || default_material || MATERIAL_STEEL)
+/obj/item/material/New(newloc, material_key)
+	..(newloc)
+	if(!material_key)
+		material_key = default_material
+	set_material(material_key)
+	if(!material)
+		qdel(src)
+		return
 
 	matter = material.get_matter()
-	if(length(matter))
+	if(matter.len)
 		for(var/material_type in matter)
 			if(!isnull(matter[material_type]))
 				matter[material_type] *= force_divisor // May require a new var instead.

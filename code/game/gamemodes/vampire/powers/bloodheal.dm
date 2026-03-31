@@ -69,7 +69,14 @@
 		CHECK_HEAL_BREAK(12)
 
 		for(var/obj/item/organ/external/current_organ in organs)
-			current_organ.drop_embedded_objects()
+			for(var/datum/wound/wound in current_organ.wounds)
+				LAZYCLEARLIST(wound.embedded_objects)
+
+			// remove embedded objects and drop them on the floor
+			for(var/obj/implanted_object in current_organ.implants)
+				if(!istype(implanted_object,/obj/item/implant))	// We don't want to remove REAL implants. Just shrapnel etc.
+					implanted_object.loc = get_turf(my_mob)
+					current_organ.implants -= implanted_object
 
 		var/organ_heal_blood = 0
 		for(var/A in organs)
@@ -99,8 +106,8 @@
 			V.cure(my_mob)
 
 		for(var/limb_type in my_mob.species.has_limbs)
-			var/obj/item/organ/external/E = my_mob.external_organs_by_name[limb_type]
-			if(E && E.organ_tag != BP_HEAD && !E.vital && !BP_IS_ROBOTIC(E) && !E.is_usable())
+			var/obj/item/organ/external/E = my_mob.organs_by_name[limb_type]
+			if(E && E.organ_tag != BP_HEAD && !E.vital && !E.is_usable()) // Skips heads and vital bits...
 				E.removed() // ...because no one wants their head to explode to make way for a new one.
 				qdel(E)
 				E = null
