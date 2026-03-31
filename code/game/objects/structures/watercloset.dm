@@ -264,7 +264,8 @@
 
 	if(isliving(O))
 		var/mob/living/L = O
-		L.adjust_fire_stacks(-100) //Douse ourselves with water to avoid fire more easily
+		L.ExtinguishMob()
+		L.fire_stacks = -20 //Douse ourselves with water to avoid fire more easily
 
 	if(iscarbon(O))
 		var/mob/living/carbon/M = O
@@ -336,7 +337,7 @@
 					H.update_inv_belt(0)
 			H.clean_blood(washshoes)
 
-			var/obj/item/organ/external/head/head = H.external_organs_by_name[BP_HEAD]
+			var/obj/item/organ/external/head/head = H.organs_by_name[BP_HEAD]
 			if(istype(head))
 				head.forehead_graffiti = null
 				head.graffiti_style = null
@@ -446,10 +447,14 @@
 	thing.reagents.clear_reagents()
 	thing.update_icon()
 
-/obj/structure/sink/attack_hand(mob/user)
+/obj/structure/sink/attack_hand(mob/user as mob)
 	if (ishuman(user))
 		var/mob/living/carbon/human/H = user
-		if(!H.is_hand_usable())
+		var/obj/item/organ/external/temp = H.organs_by_name[BP_R_HAND]
+		if (user.hand)
+			temp = H.organs_by_name[BP_L_HAND]
+		if(temp && !temp.is_usable())
+			to_chat(user, "<span class='notice'>You try to move your [temp.name], but cannot!</span>")
 			return
 
 	if(isrobot(user) || isAI(user))
@@ -541,12 +546,9 @@
 		return
 	busy = FALSE
 
-	if(user.loc != location)
-		return
-	if(QDELETED(I))
-		return
-	if(!user.has_in_hands(I))
-		return
+	if(user.loc != location) return				//User has moved
+	if(!I) return 								//Item's been destroyed while washing
+	if(user.get_active_hand() != I) return		//Person has switched hands or the item in their hands
 
 	O.clean_blood()
 

@@ -175,11 +175,9 @@
 	..()
 
 	var/damage = Proj.get_structure_damage()
-	var/is_breaching = istype(Proj, /obj/item/projectile/bullet/shotgun/breaching)
 
 	// Emitter Blasts - these will eventually completely destroy the door, given enough time.
-	// Breaching shells don't trigger this - they just deal direct damage
-	if(damage > 90 && !is_breaching)
+	if(damage > 90)
 		destroy_hits--
 		if(destroy_hits <= 0)
 			visible_message("<span class='danger'>\The [src.name] disintegrates!</span>")
@@ -193,19 +191,16 @@
 
 	if(damage)
 		//cap projectile damage so that there's still a minimum number of hits required to break the door
-		if(is_breaching)
-			take_damage(damage)
-		else
-			take_damage(min(damage, 100))
+		take_damage(min(damage, 100))
 
 
-/obj/machinery/door/hitby(atom/movable/AM, datum/thrownthing/TT)
+/obj/machinery/door/hitby(atom/movable/AM, speed = 1, nomsg = FALSE)
 	..()
 	var/tforce = 0
 	if(ismob(AM))
-		tforce = 3 * TT.speed
+		tforce = 15 * (speed/5)
 	else
-		tforce = AM:throwforce * (TT.speed/THROWFORCE_SPEED_DIVISOR)
+		tforce = AM:throwforce * (speed/5)
 	take_damage(tforce)
 	return
 
@@ -288,7 +283,7 @@
 	if(isobj(I) && density && user.a_intent == I_HURT && !(istype(I, /obj/item/card) || istype(I, /obj/item/device/pda)))
 		if(I.damtype == BRUTE || I.damtype == BURN)
 			user.do_attack_animation(src)
-			I.set_cooldown()
+			user.setClickCooldown(I.update_attack_cooldown())
 			if(I.force <= 0)
 				user.visible_message(SPAN("notice", "\The [user] smacks \the [src] with \the [I] with no visible effect."))
 				playsound(loc, hitsound, 10, 1)

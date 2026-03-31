@@ -14,7 +14,7 @@
 	same_tile = 0
 	can_throw = 1
 	force_danger = 1
-	breakability = 2
+	breakability = 3
 
 	icon_state = "reinforce1"
 

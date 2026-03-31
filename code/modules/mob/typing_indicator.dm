@@ -31,11 +31,7 @@
 	remove_all_indicators()
 	..()
 
-/client/proc/open_saywindow()
-	// I know it looks weird, believe me I do. But this is the way.
-	if(winget(src, "saywindow", "is-visible") == "false")
-		winset(src, null, "saywindow.is-visible=true;saywindow-input.focus=true")
-
+// TO-DO: move on to TGUI say, it's just better. - N
 /client/proc/close_saywindow(return_content = FALSE)
 	winset(src, null, "saywindow.is-visible=false;mapwindow.map.focus=true")
 	if (return_content)

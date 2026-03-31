@@ -141,6 +141,9 @@
 
 	return ..()
 
+/mob/living/carbon/metroid/Allow_Spacemove()
+	return 1
+
 /mob/living/carbon/metroid/Stat()
 	. = ..()
 
@@ -193,7 +196,7 @@
 	adjustBruteLoss(b_loss)
 	adjustFireLoss(f_loss)
 
-	update_health()
+	updatehealth()
 
 
 /mob/living/carbon/metroid/__unequip(obj/W)
@@ -272,7 +275,7 @@
 				)
 
 				adjustBruteLoss(damage)
-				update_health()
+				updatehealth()
 			else
 				playsound(loc, 'sound/weapons/punchmiss.ogg', 25, 1, -1)
 				visible_message(SPAN("danger", "[H] has attempted to [attack_verb] [src]!"))

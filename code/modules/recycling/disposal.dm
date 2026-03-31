@@ -213,8 +213,6 @@
 				M.client.eye = src
 
 	AM.forceMove(src)
-	if(ismob(AM))
-		playsound(src.loc, 'sound/effects/using/disposal/person_bin_get.ogg', 40, 1)
 	update_icon()
 	return
 
@@ -448,17 +446,24 @@
 		qdel(H)
 
 
-/obj/machinery/disposal/hitby(atom/movable/AM, datum/thrownthing/TT, nomsg = TRUE)
+/obj/machinery/disposal/hitby(atom/movable/AM, speed, nomsg = TRUE)
 	..()
-	if(QDELETED(AM) || !istype(AM, /obj/item))
-		return
-	if(prob((TT.target == src) ? 90 : 25))
-		AM.forceMove(src)
-		for(var/mob/M in viewers(src))
-			M.show_message("\The [AM] lands in \the [src].", 3)
+
+/obj/machinery/disposal/CanPass(atom/movable/mover, turf/target)
+	if(istype(mover,/obj/item) && mover.throwing)
+		var/obj/item/I = mover
+		if(istype(I, /obj/item/projectile))
+			return
+		if(prob(75))
+			I.forceMove(src)
+			for(var/mob/M in viewers(src))
+				M.show_message("\The [I] lands in \the [src].", 3)
+		else
+			for(var/mob/M in viewers(src))
+				M.show_message("\The [I] bounces off of \the [src]'s rim!", 3)
+		return 0
 	else
-		for(var/mob/M in viewers(src))
-			M.show_message("\The [AM] bounces off of \the [src]'s rim!", 3)
+		return ..(mover, target)
 
 // virtual disposal object
 // travels through pipes in lieu of actual items
@@ -537,7 +542,7 @@
 		if(hasmob && prob(3))
 			for(var/mob/living/H in src)
 				if(!istype(H,/mob/living/silicon/robot/drone)) //Drones use the mailing code to move through the disposal system,
-					H.take_overall_damage(20, 0, 0, "Blunt Trauma", FALSE)//horribly maim any living creature jumping down disposals.  c'est la vie
+					H.take_overall_damage(20, 0, "Blunt Trauma")//horribly maim any living creature jumping down disposals.  c'est la vie
 
 		var/obj/structure/disposalpipe/curr = loc
 		last = curr

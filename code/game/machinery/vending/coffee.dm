@@ -31,8 +31,7 @@
 		)
 
 	illegal = list(
-		/obj/item/reagent_containers/vessel/ice = 10,
-		/obj/item/storage/pill_bottle/glucose = 2
+		/obj/item/reagent_containers/vessel/ice = 10
 		)
 
 	prices = list(

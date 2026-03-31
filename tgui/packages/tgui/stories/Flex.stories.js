@@ -9,6 +9,7 @@ import { Button, Flex, Section } from "../components";
 
 export const meta = {
   title: "Flex & Sections",
+  // eslint-disable-next-line react/display-name
   render: () => <Story />,
 };
 
@@ -17,7 +18,7 @@ const Story = (props, context) => {
   const [direction, setDirection] = useLocalState(
     context,
     "fs_direction",
-    "column",
+    "column"
   );
   const [fill, setFill] = useLocalState(context, "fs_fill", true);
   const [hasTitle, setHasTitle] = useLocalState(context, "fs_title", true);

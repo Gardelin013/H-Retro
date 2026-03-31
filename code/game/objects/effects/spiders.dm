@@ -75,7 +75,7 @@
 /obj/structure/spider/stickyweb/sealed/attack_generic(mob/user, damage, attack_verb, wallbreaker)
     if(istype (user, /mob/living/simple_animal/hostile/giant_spider))
         user.visible_message(SPAN_WARNING("[user] begins to claw through the [src]!"), "You begin to claw through the [src].")
-        if(do_after(user, 50, target = src, luck_check_type = LUCK_CHECK_COMBAT))
+        if(do_after(user, 50, target = src, , luck_check_type = LUCK_CHECK_COMBAT))
             user.visible_message(SPAN_WARNING("[user] ruptures [src] open!"), "You succesfully claw through the [src].")
             health = 0
             healthcheck ()
@@ -113,7 +113,7 @@
 	var/obj/machinery/atmospherics/unary/vent_pump/entry_vent
 	var/travelling_in_vent = 0
 	var/dormant = FALSE    // If dormant, does not add the spiderling to the process list unless it's also growing
-	var/growth_chance = 80 // % chance of beginning growth, and eventually becoming a beautiful death machine
+	var/growth_chance = 50 // % chance of beginning growth, and eventually become a beautiful death machine
 
 	var/directive = "" //Message from the mother
 	var/faction = "spiders"

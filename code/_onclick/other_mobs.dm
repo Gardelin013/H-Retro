@@ -37,7 +37,8 @@
 		var/turf/above = shadow.loc
 		if(T.Adjacent(shadow) && above.CanZPass(src, UP)) //Certain structures will block passage from below, others not
 
-			if(has_gravity() && !can_overcome_gravity())
+			var/area/location = get_area(loc)
+			if(location.has_gravity && !can_overcome_gravity())
 				return
 
 			visible_message("<span class='notice'>[src] starts climbing onto \the [A]!</span>", "<span class='notice'>You start climbing onto \the [A]!</span>")
@@ -69,10 +70,10 @@
 	Aliens
 */
 
-/mob/living/carbon/larva/RestrainedClickOn(atom/A)
+/mob/living/carbon/alien/RestrainedClickOn(atom/A)
 	return
 
-/mob/living/carbon/larva/UnarmedAttack(atom/A, proximity)
+/mob/living/carbon/alien/UnarmedAttack(atom/A, proximity)
 
 	if(!..())
 		return 0
@@ -132,7 +133,7 @@
 					M.Stun(power/2)
 				else
 					M.visible_message("<span class='danger'>[src] has tried to pounce at [M]!</span>", "<span class='danger'>[src] has tried to pounce at you!</span>")
-				M.update_health()
+				M.updatehealth()
 			if (I_GRAB) // We feed
 				Wrap(M)
 			if (I_HURT) // Attacking

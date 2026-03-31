@@ -23,8 +23,7 @@
 					/obj/item/device/flashlight/glowstick/red = 3)
 	illegal = list(	/obj/item/weldingtool/hugetank = 2,
 					/obj/item/clothing/gloves/insulated/cheap = 2)
-	premium = list( /obj/item/clothing/gloves/insulated = 1,
-					/obj/item/device/multitool = 1)
+	premium = list(/obj/item/clothing/gloves/insulated = 1)
 
 	vending_sound = SFX_VENDING_GENERIC
 
@@ -52,9 +51,7 @@
 					/obj/item/airalarm_electronics = 10,
 					/obj/item/cell = 10,
 					/obj/item/clamp = 10)
-	illegal = list( /obj/item/cell/high = 3,
-					/obj/item/airlock_brace = 4,
-					/obj/item/crowbar/brace_jack = 1)
+	illegal = list(/obj/item/cell/high = 3)
 	premium = list(/obj/item/storage/belt/utility = 3)
 
 /obj/item/vending_cartridge/engivend

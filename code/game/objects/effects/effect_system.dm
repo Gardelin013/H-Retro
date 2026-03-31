@@ -353,7 +353,7 @@ steam.start() -- spawns the effect
 		R.emote("gasp")
 		spawn (20)
 			R.coughedtime = 0
-	R.update_health()
+	R.updatehealth()
 	return
 
 /////////////////////////////////////////////

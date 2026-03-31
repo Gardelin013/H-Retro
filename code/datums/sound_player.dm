@@ -259,6 +259,7 @@ GLOBAL_DATUM_INIT(sound_player, /decl/sound_player, new)
 	if(!check_preference(listener))
 		PrivRemoveListener(listener)
 		return
+
 	sound.environment = PrivGetEnvironment(listener)
 	sound.status = status|listener_status[listener]
 	if(update_sound)

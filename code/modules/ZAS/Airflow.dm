@@ -29,10 +29,10 @@ mob/living/carbon/metroid/airflow_stun()
 	return
 
 /mob/living/carbon/human/airflow_stun()
-	if(!get_eva_slip_prob())
-		to_chat(src, SPAN("notice", "Air suddenly rushes past you!"))
-		return FALSE
-	return ..()
+	if(!slip_chance())
+		to_chat(src, "<span class='notice'>Air suddenly rushes past you!</span>")
+		return 0
+	..()
 
 /atom/movable/proc/check_airflow_movable(n)
 
@@ -80,10 +80,15 @@ mob/living/carbon/metroid/airflow_stun()
 
 /mob/AirflowCanMove(n)
 	if(status_flags & GODMODE)
-		return FALSE
-	return can_slip(magboots_only = TRUE)
+		return 0
+	if(buckled)
+		return 0
+	var/obj/item/shoes = get_equipped_item(slot_shoes)
+	if(istype(shoes) && (shoes.item_flags & ITEM_FLAG_NOSLIP))
+		return 0
+	return 1
 
-/atom/movable/Bump(atom/A, yes)
+/atom/movable/Bump(atom/A)
 	if(airflow_speed > 0 && airflow_dest)
 		if(!istype(A, /obj/item))
 			if(airborne_acceleration > 1)

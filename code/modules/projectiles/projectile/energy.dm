@@ -124,7 +124,6 @@
 	armor_penetration = 20
 	fire_sound = 'sound/effects/weapons/gun/gunshot.ogg'
 	projectile_inner_range = 0.2
-	space_knockback = TRUE
 
 /obj/item/projectile/energy/electrode/c38
 	name = "shock bullet"
@@ -136,7 +135,6 @@
 	armor_penetration = 20
 	fire_sound = 'sound/effects/weapons/gun/fire_revolver44.ogg'
 	projectile_inner_range = 0.2
-	space_knockback = TRUE
 
 /obj/item/projectile/energy/c38
 	name = "overheated bullet"
@@ -151,7 +149,6 @@
 	projectile_brightness_color = "#ff8c3f"
 	projectile_inner_range = 0.2
 	projectile_outer_range = 1.25
-	space_knockback = TRUE
 
 /obj/item/projectile/energy/declone
 	name = "decloner beam"
@@ -174,7 +171,7 @@
 /obj/item/projectile/energy/bolt
 	name = "bolt"
 	icon_state = "cbbolt"
-	damage = 50
+	damage = 10
 	damage_type = TOX
 	nodamage = 0
 	agony = 40
@@ -183,10 +180,8 @@
 
 /obj/item/projectile/energy/bolt/large
 	name = "largebolt"
-	icon_state = "cbboltl"
-	damage = 85
+	damage = 20
 	agony = 60
-	space_knockback = TRUE
 
 
 /obj/item/projectile/energy/neurotoxin
@@ -225,19 +220,20 @@
 	poisedamage = 20.0
 
 /obj/item/projectile/energy/plasmastun/proc/bang(mob/living/carbon/M)
-	if(!istype(M))
-		return
+
 	to_chat(M, "<span class='danger'>You hear a loud roar.</span>")
 	var/ear_safety = 0
-	if(ishuman(M))
-		ear_safety = M.get_ear_protection()
+	if(iscarbon(M))
+		if(ishuman(M))
+			ear_safety = M.get_ear_protection()
 	if(ear_safety == 1)
 		M.make_dizzy(120)
 	else if (ear_safety > 1)
 		M.make_dizzy(60)
 	else if (!ear_safety)
 		M.make_dizzy(300)
-		M.adjustEarDamage(rand(1, 10), 15)
+		M.ear_damage += rand(1, 10)
+		M.ear_deaf = max(M.ear_deaf,15)
 	if (M.ear_damage >= 15)
 		to_chat(M, "<span class='danger'>Your ears start to ring badly!</span>")
 		if (prob(M.ear_damage - 5))

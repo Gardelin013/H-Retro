@@ -315,10 +315,15 @@ var/list/robot_hud_colours = list("#ffffff","#cccccc","#aaaaaa","#888888","#6666
 	return applying
 
 /obj/item/organ/external/proc/bandage_level()
-	if(bandaged <= 0)
+	if(damage_state_text() == "00")
 		return 0
-	if(bandaged < max_damage * 0.25)
-		return 1
-	if(bandaged < max_damage * 0.75)
-		return 2
-	return 3
+	if(!is_bandaged())
+		return 0
+	if(burn_dam + brute_dam == 0)
+		. = 0
+	else if (burn_dam + brute_dam < (max_damage * 0.25 / 2))
+		. = 1
+	else if (burn_dam + brute_dam < (max_damage * 0.75 / 2))
+		. = 2
+	else
+		. = 3

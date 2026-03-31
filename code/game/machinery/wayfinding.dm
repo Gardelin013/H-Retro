@@ -62,7 +62,7 @@
 	location = "Head of Security's Office"
 
 /obj/machinery/navbeacon/wayfinding/hop
-	location = "Head of Provisioning's Office"
+	location = "Head of Personnel's Office"
 
 /obj/machinery/navbeacon/wayfinding/hop/Initialize()
 	. = ..()

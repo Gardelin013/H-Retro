@@ -112,9 +112,6 @@
 	if(old_z != z && create_childs)
 		create_childs()
 
-/obj/effect/singularity/is_space_movement_permitted(allow_movement = FALSE)
-	return SPACE_MOVE_PERMITTED
-
 /obj/singularity/think()
 	eat()
 	dissipate()

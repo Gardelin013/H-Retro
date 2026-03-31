@@ -2,6 +2,7 @@
  * Default internal surgery step, does nothing.
  */
 /datum/surgery_step/internal
+	can_infect = FALSE
 	blood_level = BLOODY_HANDS
 	delicate = TRUE
 	shock_level = 40
@@ -21,7 +22,7 @@
 	if(BP_IS_ROBOTIC(parent_organ))
 		return parent_organ.hatch_state == HATCH_OPENED
 
-	return parent_organ.is_surgically_open() == (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)
+	return parent_organ.open() == (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)
 
 /**
  * Organ attachment operation via Fix'o Vein, doesn't work on synths.
@@ -87,7 +88,7 @@
 		"[user]'s hand slips, damaging the flesh in [target]'s [parent_organ] with \the [tool]!",
 		"Your hand slips, damaging the flesh in [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(20, tool)
+	parent_organ.take_external_damage(20, used_weapon = tool)
 
 /**
  * Organ detachment step using any sharp object, doesn't work on sinths.
@@ -147,7 +148,12 @@
 		"[user]'s hand slips, slicing an artery inside [target]'s [parent_organ] with \the [tool]!",
 		"Your hand slips, slicing an artery inside [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_cut_damage(rand(30, 50), tool)
+	parent_organ.take_external_damage(
+		rand(30, 50),
+		0,
+		(DAM_SHARP|DAM_EDGE),
+		used_weapon = tool
+		)
 
 /**
  * Removes organ from parent using any poking tool.
@@ -208,7 +214,7 @@
 		"[user]'s hand slips, damaging [target]'s [parent_organ] with \the [tool]!",
 		"Your hand slips, damaging [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_blunt_damage(20, tool)
+	parent_organ.take_external_damage(20, used_weapon = tool)
 
 /**
  * Puts organ inside its parent.
@@ -336,7 +342,7 @@
 		if(I.parent_organ != parent_organ.organ_tag)
 			continue
 
-		if(!I.surface_accessible && parent_organ.is_surgically_open() < (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED))
+		if(!I.surface_accessible && parent_organ.open() < (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED))
 			continue
 
 		damaged_organs[I] = adjust_organ_image(I)
@@ -388,7 +394,7 @@
 		return FALSE
 
 	if(!. && !organ_fixer.emagged)
-		target.show_splash_text(user, "no healing required!", "The organ doesn't require any healing!")
+		target.show_splash_text(user, "organ doesn't require any healing!", "The organ doesn't require any healing!!")
 		return SURGERY_FAILURE
 
 	if(organ_fixer.gel_amt == 0)
@@ -430,8 +436,8 @@
 			150
 			)
 		target.adjustToxLoss(30)
-		parent_organ.take_cut_damage(10, organ_fixer)
-		internal_organ.take_internal_damage((internal_organ.max_damage - internal_organ.damage), 0)
+		parent_organ.take_external_damage(10, 0, (DAM_SHARP|DAM_EDGE), used_weapon = organ_fixer)
+		internal_organ.take_internal_damage((parent_organ.max_damage - parent_organ.damage), 0)
 		return
 
 	announce_success(user,
@@ -456,7 +462,7 @@
 		)
 
 	target.adjustToxLoss(10)
-	parent_organ.take_cut_damage(5, tool)
+	parent_organ.take_external_damage(5, 0, (DAM_SHARP|DAM_EDGE), used_weapon = tool)
 
 	if(internal_organ.damage > 0)
 		internal_organ.take_internal_damage(5, 0)
@@ -468,8 +474,8 @@
 	duration = ORGAN_FIX_DURATION * 1.75
 
 	allowed_tools = list(
-		/obj/item/stack/medical/gel/brute= 67,
-		/obj/item/stack/medical/bandage = 34
+		/obj/item/stack/medical/advanced/bruise_pack= 67,
+		/obj/item/stack/medical/bruise_pack = 34
 		)
 
 /datum/surgery_step/internal/fix_organ/ghetto/check_target_organ(obj/item/organ/target_organ, mob/living/carbon/human/target, obj/item/tool, atom/user)
@@ -477,7 +483,10 @@
 	if(!.)
 		return
 
-	if(!istype(tool, /obj/item/stack/medical/gel/brute) && !istype(tool, /obj/item/stack/medical/bandage))
+	if(!istype(tool, /obj/item/stack/medical/advanced/bruise_pack))
+		return FALSE
+
+	if(!istype(tool, /obj/item/stack/medical/bruise_pack))
 		return FALSE
 
 	var/obj/item/stack/medical/M = tool
@@ -489,9 +498,9 @@
 
 /datum/surgery_step/internal/fix_organ/ghetto/initiate(obj/item/organ/external/parent_organ, obj/item/organ/target_organ, mob/living/carbon/human/target, obj/item/tool, mob/user)
 	var/tool_name = "\the [tool]"
-	if(istype(tool, /obj/item/stack/medical/gel/brute))
+	if(istype(tool, /obj/item/stack/medical/advanced/bruise_pack))
 		tool_name = "regenerative membrane"
-	else if(istype(tool, /obj/item/stack/medical/bandage))
+	else if(istype(tool, /obj/item/stack/medical/bruise_pack))
 		tool_name = "the bandaid"
 
 	announce_preop(user,
@@ -507,9 +516,9 @@
 		return
 
 	var/tool_name = "\the [tool]"
-	if(istype(tool, /obj/item/stack/medical/gel/brute))
+	if(istype(tool, /obj/item/stack/medical/advanced/bruise_pack))
 		tool_name = "regenerative membrane"
-	else if(istype(tool, /obj/item/stack/medical/bandage))
+	else if(istype(tool, /obj/item/stack/medical/bruise_pack))
 		tool_name = "the bandaid"
 
 	if((internal_organ.status & ORGAN_DEAD) && internal_organ.can_recover())
@@ -536,12 +545,12 @@
 		)
 
 	var/dam_amt = 2
-	if(istype(tool, /obj/item/stack/medical/gel/brute))
+	if(istype(tool, /obj/item/stack/medical/advanced/bruise_pack))
 		target.adjustToxLoss(5)
 	else
 		dam_amt = 5
 		target.adjustToxLoss(10)
-		parent_organ.take_cut_damage(dam_amt, tool)
+		parent_organ.take_external_damage(dam_amt, 0, (DAM_SHARP|DAM_EDGE), used_weapon = tool)
 
 	for(var/obj/item/organ/internal/I in parent_organ.internal_organs)
 		if(I.damage > 0 && !BP_IS_ROBOTIC(I))
@@ -581,7 +590,7 @@
 		if(I.parent_organ != parent_organ.organ_tag)
 			continue
 
-		if(!I.surface_accessible && parent_organ.is_surgically_open() < (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED))
+		if(!I.surface_accessible && parent_organ.open() < (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED))
 			continue
 
 		return TRUE
@@ -616,14 +625,15 @@
 			"Your whole [parent_organ] feels like it's getting torn apart!",
 			150
 			)
-		parent_organ.take_cut_damage(30, organ_fixer)
+		target.adjustToxLoss(30)
+		parent_organ.take_external_damage(15, 0, (DAM_SHARP|DAM_EDGE), used_weapon = organ_fixer)
 		for(var/obj/item/organ/internal/I in parent_organ.internal_organs)
-			if(I && (I.surface_accessible || parent_organ.is_surgically_open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
+			if(I && (I.surface_accessible || parent_organ.open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
 				I.take_internal_damage((parent_organ.max_damage - parent_organ.damage), 0)
 		return
 
 	for(var/obj/item/organ/internal/I in parent_organ.internal_organs)
-		if(I.damage > 0 && !BP_IS_ROBOTIC(I) && (I.surface_accessible || parent_organ.is_surgically_open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
+		if(I.damage > 0 && !BP_IS_ROBOTIC(I) && (I.surface_accessible || parent_organ.open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
 			if(organ_fixer.gel_amt == 0)
 				return
 
@@ -649,9 +659,10 @@
 		"[user]'s hand slips, getting mess and tearing the inside of [target]'s [parent_organ] with \the [tool]!",
 		"Your hand slips, getting mess and tearing the inside of [target]'s [parent_organ] with \the [tool]!"
 		)
-	parent_organ.take_cut_damage(5, tool)
+	target.adjustToxLoss(10)
+	parent_organ.take_external_damage(5, 0, (DAM_SHARP|DAM_EDGE), used_weapon = tool)
 	for(var/obj/item/organ/internal/I in parent_organ.internal_organs)
-		if(I.damage > 0 && !BP_IS_ROBOTIC(I) && (I.surface_accessible || parent_organ.is_surgically_open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
+		if(I.damage > 0 && !BP_IS_ROBOTIC(I) && (I.surface_accessible || parent_organ.open() >= (parent_organ.encased ? SURGERY_ENCASED : SURGERY_RETRACTED)))
 			I.take_internal_damage(5, 0)
 
 /**

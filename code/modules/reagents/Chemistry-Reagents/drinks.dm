@@ -13,8 +13,8 @@
 	metabolism = 5.0
 	ingest_met = 1.0
 	digest_met = 5.0
-	ingest_absorbability = 0.0
-	digest_absorbability = 0.0
+	ingest_absorbability = 0.5
+	digest_absorbability = 1.0
 	hydration_value = 1.0
 
 	var/nutrition = 0 // Per ml
@@ -29,7 +29,10 @@
 	return
 
 /datum/reagent/drink/affect_ingest(mob/living/carbon/M, alien, removed)
-	..()
+	if(hydration_value > 0)
+		M.add_hydration(removed * hydration_value)
+	else if(hydration_value < 0)
+		M.remove_hydration(removed * hydration_value)
 
 	M.add_nutrition(nutrition * removed * ingest_absorbability) // For hunger and fatness
 
@@ -40,7 +43,10 @@
 	return
 
 /datum/reagent/drink/affect_digest(mob/living/carbon/M, alien, removed)
-	..()
+	if(hydration_value > 0)
+		M.add_hydration(removed * hydration_value)
+	else if(hydration_value < 0)
+		M.remove_hydration(removed * hydration_value)
 
 	M.add_nutrition(nutrition * removed * digest_absorbability)
 
@@ -322,7 +328,7 @@
 	..()
 	if(alien == IS_DIONA)
 		return
-	M.add_chemical_effect(CE_BURN_REGEN, 0.5)
+	M.heal_organ_damage(0, 0.1 * removed)
 
 /datum/reagent/drink/juice/watermelon
 	name = "Watermelon Juice"
@@ -362,7 +368,7 @@
 	..()
 	if(alien == IS_DIONA)
 		return
-	M.add_chemical_effect(CE_BURN_REGEN, 0.5)
+	M.heal_organ_damage(0, 0.1 * removed)
 
 /datum/reagent/drink/juice/coconut
 	name = "Coconut Milk"
@@ -405,7 +411,7 @@
 	..()
 	if(alien == IS_DIONA)
 		return
-	M.add_chemical_effect(CE_BRUTE_REGEN, 0.5)
+	M.heal_organ_damage(0.5 * removed, 0)
 	holder.remove_reagent(/datum/reagent/capsaicin, 10 * removed)
 
 /datum/reagent/drink/milk/chocolate
@@ -716,7 +722,7 @@
 /datum/reagent/drink/nuka_cola/affect_digest(mob/living/carbon/M, alien, removed)
 	..()
 	M.make_jittery(20)
-	M.make_drugged(30)
+	M.druggy = max(M.druggy, 30)
 	M.dizziness += 5
 	M.drowsyness = 0
 

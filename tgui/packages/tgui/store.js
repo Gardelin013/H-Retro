@@ -31,7 +31,7 @@ export const configureStore = (options = {}) => {
         backendMiddleware,
         ...(options.middleware?.post || []),
       ];
-  if (import.meta.env.DEV) {
+  if (process.env.NODE_ENV !== "production") {
     // We are using two if statements because Webpack is capable of
     // removing this specific block as dead code.
     if (sideEffects) {

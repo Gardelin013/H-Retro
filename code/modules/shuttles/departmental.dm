@@ -55,4 +55,3 @@
 	light_inner_range_on = 0.5
 	light_outer_range_on = 1.5
 	density = 0
-	turf_height_offset = 0

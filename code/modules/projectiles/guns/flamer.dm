@@ -30,7 +30,6 @@
 	var/last_fired = 0
 	fire_delay = 35
 	has_safety = FALSE
-	space_recoil = TRUE
 
 /obj/item/gun/flamer/Destroy()
 	QDEL_NULL(fuel_tank)
@@ -95,7 +94,7 @@
 	remove_fuel_tank(usr)
 
 /obj/item/gun/flamer/attack_hand(mob/user)
-	if(user.has_in_hands(src))
+	if(user.get_inactive_hand() == src)
 		remove_fuel_tank(user)
 		return
 	. = ..()

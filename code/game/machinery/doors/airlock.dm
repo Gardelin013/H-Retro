@@ -46,12 +46,12 @@
 	var/secured_wires = 0
 	var/datum/wires/airlock/wires = null
 
-	var/open_sound_powered = 'sound/machines/airlock/normal_open.ogg'
-	var/open_sound_unpowered = 'sound/machines/airlock/force_open.ogg'
+	var/open_sound_powered = list('sound/machines/airlock/open1.ogg', 'sound/machines/airlock/open2.ogg', 'sound/machines/airlock/open3.ogg')
+	var/open_sound_unpowered = 'sound/machines/airlock/open_force1.ogg'
 	var/open_failure_access_denied = 'sound/machines/airlock/error3.ogg'
 
-	var/close_sound_powered = 'sound/machines/airlock/normal_close.ogg'
-	var/close_sound_unpowered = 'sound/machines/airlock/force_close.ogg'
+	var/close_sound_powered = 'sound/machines/airlock/close1.ogg'
+	var/close_sound_unpowered = 'sound/machines/airlock/close_force1.ogg'
 	var/close_failure_blocked = 'sound/machines/airlock/error1.ogg'
 
 	var/bolts_rising = 'sound/machines/bolts_up.ogg'
@@ -76,10 +76,6 @@
 			visible_message("<span class='notice'>\The [user] strains fruitlessly to force \the [src] [density ? "open" : "closed"].</span>")
 		return
 	..()
-
-/obj/machinery/door/airlock/add_debris_element()
-	AddElement(/datum/element/debris, DEBRIS_SPARKS, -10, 5)
-
 
 /obj/machinery/door/airlock/get_material()
 	return get_material_by_name(mineral ? mineral : MATERIAL_STEEL)
@@ -285,7 +281,7 @@ About the new airlock wires panel:
 	if(density)
 		if(locked && lights && power_systems_on)
 			icon_state = "door_locked"
-			AddOverlays(OVERLAY(icon, "lights_bolts", dir = src.dir))
+			AddOverlays(OVERLAY(icon, "lights_bolts"))
 			AddOverlays(emissive_appearance(icon, "lights_bolts_ea"))
 			set_light(0.35, 0.9, 1.5, 3, COLOR_RED_LIGHT)
 		else
@@ -293,18 +289,18 @@ About the new airlock wires panel:
 
 		if(p_open || welded)
 			if(p_open)
-				AddOverlays(OVERLAY(icon, "panel_open", dir = src.dir))
+				AddOverlays(OVERLAY(icon, "panel_open"))
 			if(!(stat & NOPOWER))
 				if(stat & BROKEN)
-					AddOverlays(OVERLAY(icon, "sparks_broken", dir = src.dir))
+					AddOverlays(OVERLAY(icon, "sparks_broken"))
 					AddOverlays(emissive_appearance(icon, "sparks_broken_ea"))
 				else if(health < maxhealth * 0.75)
-					AddOverlays(OVERLAY(icon, "sparks_damaged", dir = src.dir))
+					AddOverlays(OVERLAY(icon, "sparks_damaged"))
 					AddOverlays(emissive_appearance(icon, "sparks_damaged_ea"))
 			if(welded)
-				AddOverlays(OVERLAY(icon, "welded", dir = src.dir))
+				AddOverlays(OVERLAY(icon, "welded"))
 		else if(health < maxhealth * 0.75 && !(stat & NOPOWER))
-			AddOverlays(OVERLAY(icon, "sparks_damaged", dir = src.dir))
+			AddOverlays(OVERLAY(icon, "sparks_damaged"))
 			AddOverlays(emissive_appearance(icon, "sparks_damaged_ea"))
 
 		if(!p_open && power_systems_on && !operating)
@@ -314,7 +310,7 @@ About the new airlock wires panel:
 		if(power_systems_on && !p_open) // Doors with opened panels have no green lights on their icons
 			set_light(0.30, 0.9, 1.5, 3, COLOR_LIME)
 		if((stat & BROKEN) && !(stat & NOPOWER))
-			AddOverlays(OVERLAY(icon, "sparks_open", dir = src.dir))
+			AddOverlays(OVERLAY(icon, "sparks_open"))
 			AddOverlays(emissive_appearance(icon, "sparks_open_ea"))
 
 	if(brace)
@@ -859,7 +855,7 @@ About the new airlock wires panel:
 	use_power_oneoff(360)	//360 W seems much more appropriate for an actuator moving an industrial door capable of crushing people
 	tryingToLock = FALSE
 	if(arePowerSystemsOn())
-		playsound(src.loc, pick(close_sound_powered), 100, 1)
+		playsound(src.loc, close_sound_powered, 100, 1)
 	else
 		playsound(src.loc, close_sound_unpowered, 100, 1)
 
@@ -943,7 +939,6 @@ About the new airlock wires panel:
 		wires = new /datum/wires/airlock(src)
 
 /obj/machinery/door/airlock/Initialize()
-	add_debris_element()
 	if(closeOtherId != null)
 		for(var/obj/machinery/door/airlock/A in world)
 			if(A.closeOtherId == closeOtherId && A != src)

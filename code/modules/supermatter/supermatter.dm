@@ -20,10 +20,11 @@
 #define CRITICAL_TEMPERATURE 5000	//K
 #define CHARGING_FACTOR 0.05
 #define DAMAGE_RATE_LIMIT 4.5		//damage rate cap at power = 300, scales linearly with power
-#define RADIATION_RELEASE 100 KILO ELECTRONVOLT	//Higher == more radiation released by the SM
+#define RADIATION_RELEASE_MODIFIER 100 KILO ELECTRONVOLT	//Higher == more radiation released by the SM
 
 // Experimental randomized supermatter
 #define DELTA_THERMAL_RELEASE_MODIFIER 6000
+#define DELTA_RADIATION_RELEASE_MODIFIER 0.7
 #define DELTA_POWER_FACTOR 0.2
 #define DELTA_DECAY_FACTOR 100
 #define DELTA_CRITICAL_TEMPERATURE 2600
@@ -61,7 +62,7 @@
 	layer = ABOVE_OBJ_LAYER
 
 	var/current_thermal_release_modifier = THERMAL_RELEASE_MODIFIER
-	var/current_radiation_release_modifier = 1
+	var/current_radiation_release_modifier = RADIATION_RELEASE_MODIFIER
 	var/current_power_factor = POWER_FACTOR
 	var/current_decay_factor = DECAY_FACTOR
 	var/current_critical_temperature = CRITICAL_TEMPERATURE
@@ -120,14 +121,12 @@
 	var/aw_EPR = FALSE
 
 	var/datum/radiation_source/rad_source = null
-	var/datum/sound_token/ambient_sound_token = null
 
 	is_poi = TRUE
 
 /obj/machinery/power/supermatter/Initialize()
 	. = ..()
 	uid = gl_uid++
-	ambient_sound_token = GLOB.sound_player.PlayLoopingSound(src, "\ref[src]_supermatter_ambient", 'sound/machines/supermatter_ambient.ogg', volume = 60, range = 8, falloff = 2)
 
 /obj/machinery/power/supermatter/proc/handle_admin_warnings()
 	if(disable_adminwarn)
@@ -212,11 +211,6 @@
 		return
 
 	var/list/affected_z = GetConnectedZlevels(TS.z)
-	var/sound/boom_sound = sound('sound/effects/explosions/global_supermatter_boom.ogg', volume = 100)
-	for(var/mob/M in GLOB.player_list)
-		var/turf/T = get_turf(M)
-		if(T && (T.z in affected_z) && !istype(M, /mob/new_player) && !isdeaf(M))
-			sound_to(M, boom_sound)
 
 	// Effect 1: Radiation, weakening to all mobs on Z level
 	for(var/z in affected_z)
@@ -416,7 +410,7 @@
 		if(rad_source == null)
 			rad_source = SSradiation.radiate(src, new /datum/radiation/preset/supermatter)
 
-		rad_source.info.energy = power * RADIATION_RELEASE * current_radiation_release_modifier
+		rad_source.info.energy = power * current_radiation_release_modifier
 	else
 		qdel(rad_source)
 
@@ -439,10 +433,6 @@
 			H.adjust_hallucination(effect, 0.25 * effect)
 
 /obj/machinery/power/supermatter/Destroy()
-	if(ambient_sound_token)
-		ambient_sound_token.Stop()
-		ambient_sound_token = null
-
 	qdel(rad_source)
 
 	. = ..()
@@ -524,9 +514,9 @@
 	qdel_self()
 	return TRUE
 
-/obj/machinery/power/supermatter/throw_impact(atom/hit_atom, datum/thrownthing/TT)
-	..()
-	if(hit_atom.density)
+/obj/machinery/power/supermatter/throw_impact(atom/hit_atom, speed, target_zone)
+	. = ..()
+	if (hit_atom.density)
 		Consume(hit_atom)
 
 /obj/machinery/power/supermatter/Bumped(atom/movable/AM)
@@ -550,7 +540,7 @@
 	if (istype(victim, /obj/machinery/power/supermatter))
 		var/obj/machinery/power/supermatter/supermatter_victim = victim
 		if (config.misc.meme_content)
-			supermatter_victim.throw_at(get_edge_target_turf(supermatter_victim, get_dir(src, supermatter_victim)), rand(SUPERMATTER_MIN_THROW_DIST, SUPERMATTER_MAX_THROW_DIST), TRUE)
+			supermatter_victim.throw_at(get_edge_target_turf(supermatter_victim, get_dir(src, supermatter_victim)), rand(SUPERMATTER_MIN_THROW_DIST, SUPERMATTER_MAX_THROW_DIST), 1)
 			supermatter_victim.visible_message(SPAN_WARNING("\The [supermatter_victim] briefly lights up and instantly starts flying in the opposite direction."))
 		else
 			power += supermatter_victim.power
@@ -630,7 +620,7 @@
 /obj/machinery/power/supermatter/random/Initialize()
 	. = ..()
 	current_thermal_release_modifier = rand(THERMAL_RELEASE_MODIFIER - DELTA_THERMAL_RELEASE_MODIFIER, THERMAL_RELEASE_MODIFIER + DELTA_THERMAL_RELEASE_MODIFIER)
-	current_radiation_release_modifier = rand(7, 12)/10
+	current_radiation_release_modifier = rand(10*(RADIATION_RELEASE_MODIFIER - DELTA_RADIATION_RELEASE_MODIFIER), 10*(RADIATION_RELEASE_MODIFIER + DELTA_RADIATION_RELEASE_MODIFIER)) / 10
 	current_power_factor = rand(10*(POWER_FACTOR - DELTA_POWER_FACTOR), 10*(POWER_FACTOR + DELTA_POWER_FACTOR)) / 10
 	current_decay_factor = rand(DECAY_FACTOR - DELTA_DECAY_FACTOR, DECAY_FACTOR + DELTA_DECAY_FACTOR)
 	current_critical_temperature = rand(CRITICAL_TEMPERATURE - DELTA_CRITICAL_TEMPERATURE, CRITICAL_TEMPERATURE + DELTA_CRITICAL_TEMPERATURE)
@@ -675,11 +665,11 @@
 		info += "Extreme<br>"
 
 	info += "<b>Radiation Release:</b> "
-	if(SM.current_radiation_release_modifier < 0.9)
+	if(SM.current_radiation_release_modifier < 1.2)
 		info += "Low<br>"
-	else if(SM.current_radiation_release_modifier < 1)
+	else if(SM.current_radiation_release_modifier < 1.7)
 		info += "Medium<br>"
-	else if(SM.current_radiation_release_modifier < 1.1)
+	else if(SM.current_radiation_release_modifier < 2.1)
 		info += "High<br>"
 	else
 		info += "Extreme<br>"
@@ -744,8 +734,9 @@
 #undef DETONATION_SHUTDOWN_RNG_FACTOR
 #undef DETONATION_SOLAR_BREAK_CHANCE
 #undef WARNING_DELAY
-#undef RADIATION_RELEASE
+#undef RADIATION_RELEASE_MODIFIER
 #undef DELTA_THERMAL_RELEASE_MODIFIER
+#undef DELTA_RADIATION_RELEASE_MODIFIER
 #undef DELTA_POWER_FACTOR
 #undef DELTA_DECAY_FACTOR
 #undef DELTA_CRITICAL_TEMPERATURE

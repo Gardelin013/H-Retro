@@ -154,7 +154,7 @@
 
 	if(user.a_intent != I_HELP)
 		. = ..()
-		if(isnull(.))	//item/attack() does it's own messaging and logs
+		if (!.)	//item/attack() does it's own messaging and logs
 			return 0	// item/attack() will return 1 if they hit, 0 if they missed.
 
 		//whacking someone causes a much poorer electrical contact than deliberately prodding them.
@@ -189,11 +189,11 @@
 		deductcharge(hitcost)
 	return 0
 
-/obj/item/melee/baton/throw_impact(hit_atom, datum/thrownthing/TT)
-	..()
+/obj/item/melee/baton/throw_impact(hit_atom, speed)
+	. = ..()
 	if(isliving(hit_atom) && status && prob(50))
 		var/mob/living/L = hit_atom
-		L.stun_effect_act(stun_amount = rand(2,5), agony_amount = rand(10, 90), def_zone = ran_zone(TT.target_zone, 30), used_weapon = src)
+		L.stun_effect_act(stun_amount = rand(2,5), agony_amount = rand(10, 90), def_zone = ran_zone(BP_CHEST, 75), used_weapon = src)
 		playsound(L.loc, SFX_STUNSTICK_HIT, 70, FALSE, -1)
 		deductcharge(hitcost)
 

@@ -71,9 +71,6 @@
 /area/bridge/meeting_room/cafe
 	name = "\improper Heads of Staff Cafeteria"
 
-/area/bridge/storage
-	name = "\improper Bridge Storage"
-
 // Shuttles
 
 /area/shuttle/constructionsite
@@ -1088,9 +1085,6 @@
 	name = "\improper Command - Captain's Office"
 	icon_state = "captain"
 	sound_env = MEDIUM_SOFTFLOOR
-
-/area/crew_quarters/captain/quarters
-	name = "\improper Command - Captain's Quarters"
 
 // Crew
 

@@ -47,8 +47,8 @@
 		"hot",
 		"cold"
 	)
-	var/open_sound = 'sound/machines/airlock/quiet_open.ogg'
-	var/close_sound = 'sound/machines/airlock/quiet_close.ogg'
+	var/open_sound = 'sound/machines/blastdoor_open.ogg'
+	var/close_sound = 'sound/machines/blastdoor_close.ogg'
 
 /obj/machinery/door/firedoor/Initialize()
 	. = ..()
@@ -462,21 +462,6 @@
 		changed = TRUE
 	if(changed)
 		update_icon()
-
-/obj/machinery/door/firedoor/rcd_vals(mob/user, obj/item/construction/rcd/the_rcd)
-	switch(the_rcd.mode)
-		if(RCD_DECONSTRUCT)
-			return list("delay" = 5 SECONDS, "cost" = 32)
-
-	return FALSE
-
-/obj/machinery/door/firedoor/rcd_act(mob/user, obj/item/construction/rcd/the_rcd, list/rcd_data)
-	switch(rcd_data["[RCD_DESIGN_MODE]"])
-		if(RCD_DECONSTRUCT)
-			qdel_self()
-			return TRUE
-
-	return FALSE
 
 //These are playing merry hell on ZAS.  Sorry fellas :(
 

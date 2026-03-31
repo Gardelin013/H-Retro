@@ -147,6 +147,10 @@
 				for(var/i = 1 to slip_dist)
 					step(M, M.dir)
 					sleep(1)
+			else
+				M.inertia_dir = 0
+		else
+			M.inertia_dir = 0
 
 	..()
 
@@ -170,7 +174,7 @@
 
 // Only adds blood on the floor -- Skie
 /turf/simulated/proc/add_blood_floor(mob/living/carbon/M as mob)
-	if(ischestburster(M))
+	if( istype(M, /mob/living/carbon/alien ))
 		var/obj/effect/decal/cleanable/blood/xeno/this = new /obj/effect/decal/cleanable/blood/xeno(src)
 		this.blood_DNA["UNKNOWN BLOOD"] = "X*"
 	else if( istype(M, /mob/living/silicon/robot ))

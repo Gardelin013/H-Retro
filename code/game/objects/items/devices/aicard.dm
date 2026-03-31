@@ -62,7 +62,7 @@
 			to_chat(carded_ai, "Your core files are being wiped!")
 			while (carded_ai && !carded_ai.is_ooc_dead())
 				carded_ai.adjustOxyLoss(2)
-				carded_ai.update_health()
+				carded_ai.updatehealth()
 				sleep(10)
 			flush = 0
 	if (href_list["radio"])

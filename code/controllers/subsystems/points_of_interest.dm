@@ -184,7 +184,7 @@ SUBSYSTEM_DEF(points_of_interest)
 		return 4
 	if(isbrain(target))
 		return 5
-	if(islarva(target))
+	if(isalien(target))
 		return 6
 	if(isobserver(target))
 		return 7

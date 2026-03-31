@@ -66,8 +66,6 @@ var/const/GHOST_IMAGE_ALL = ~GHOST_IMAGE_NONE
 	var/turf/T = locate(new_x, new_y, z)
 	if(T)
 		forceMove(T)
-		throwing = null
+		inertia_dir = 0
+		throwing = 0
 		to_chat(src, "<span class='notice'>You cannot move further in this direction.</span>")
-
-/mob/observer/can_slip(magboots_only = FALSE)
-	return FALSE

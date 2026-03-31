@@ -20,7 +20,7 @@
 	LAZYREMOVE(allowed_movers, mover)
 
 // Admin object possession
-/datum/movement_handler/mob/admin_possess/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/admin_possess/DoMove(direction)
 	if(QDELETED(mob.control_object))
 		return MOVEMENT_REMOVE
 
@@ -34,7 +34,7 @@
 		control_object.set_dir(direction)
 
 // Death handling
-/datum/movement_handler/mob/death/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/death/DoMove(direction, mob/mover)
 	if(!mob.is_ooc_dead())
 		return
 	. = MOVEMENT_HANDLED
@@ -45,7 +45,7 @@
 	mob.ghostize()
 
 // Incorporeal/Ghost movement
-/datum/movement_handler/mob/incorporeal/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/incorporeal/DoMove(direction)
 	. = MOVEMENT_HANDLED
 	direction = mob.AdjustMovementDirection(direction)
 
@@ -63,7 +63,7 @@
 	return
 
 // Eye movement
-/datum/movement_handler/mob/eye/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/eye/DoMove(direction, mob/mover)
 	if(IS_NOT_SELF(mover)) // We only care about direct movement
 		return
 	if(!mob.eyeobj)
@@ -86,35 +86,27 @@
 	return (MOVEMENT_PROCEED|MOVEMENT_HANDLED)
 
 // Space movement
-/datum/movement_handler/mob/space
-	var/last_space_move_result
-
-// Notes on space movement chain:
-// - owning mob calls MayMove() via normal movement handler chain
-// - MayMove() sets last_space_move_result based on is_space_movement_permitted() (checks for footing, magboots, etc)
-// - last_space_move_result is checked in DoMove() and passed to try_space_move() as a param, which returns TRUE/FALSE
-// - if the original move result was forbidden, or try_space_move() fails, the handler prevents movement.
-// - Otherwise it goes ahead and lets the mob move.
-
-/datum/movement_handler/mob/space/DoMove(direction, mob/mover, is_external)
-	if(mob.has_gravity() || (IS_NOT_SELF(mover) && is_external))
-		return
-	if(last_space_move_result == SPACE_MOVE_FORBIDDEN || !mob.try_space_move(last_space_move_result, direction))
-		return MOVEMENT_HANDLED
+/datum/movement_handler/mob/space/DoMove(direction, mob/mover)
+	if(!mob.check_solid_ground())
+		var/allowmove = mob.Allow_Spacemove(0)
+		if(!allowmove)
+			return MOVEMENT_HANDLED
+		else if(allowmove == -1 && mob.handle_spaceslipping()) //Check to see if we slipped
+			return MOVEMENT_HANDLED
+		else
+			mob.inertia_dir = 0 //If not then we can reset inertia and move
 
 /datum/movement_handler/mob/space/MayMove(mob/mover, is_external)
 	if(IS_NOT_SELF(mover) && is_external)
 		return MOVEMENT_PROCEED
 
-	if(!mob.has_gravity())
-		last_space_move_result = mob.is_space_movement_permitted(allow_movement = TRUE)
-		if(last_space_move_result == SPACE_MOVE_FORBIDDEN)
+	if(!mob.check_solid_ground())
+		if(!mob.Allow_Spacemove(0))
 			return MOVEMENT_STOP
-
 	return MOVEMENT_PROCEED
 
 // Buckle movement
-/datum/movement_handler/mob/buckle_relay/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/buckle_relay/DoMove(direction, mover)
 	// TODO: Datumlize buckle-handling
 	if(istype(mob.buckled, /obj/vehicle))
 		//drunk driving
@@ -147,7 +139,7 @@
 			direction = mob.AdjustMovementDirection(direction)
 			mob.buckled.DoMove(direction, mob)
 
-/datum/movement_handler/mob/buckle_relay/MayMove(mover, is_external)
+/datum/movement_handler/mob/buckle_relay/MayMove(mover)
 	if(mob.buckled)
 		return mob.buckled.MayMove(mover, FALSE) ? (MOVEMENT_PROCEED|MOVEMENT_HANDLED) : MOVEMENT_STOP
 	return MOVEMENT_PROCEED
@@ -160,7 +152,7 @@
 /datum/movement_handler/mob/delay/DoMove(direction, mover, is_external)
 	if(is_external)
 		return
-	delay = max(1, (mob.movement_delay() / (IS_POWER_OF_TWO(direction) ? 1.0 : 0.7)) + GetGrabSlowdown())
+	delay = max(1, mob.movement_delay() + GetGrabSlowdown())
 	next_move = world.time + delay
 	UpdateGlideSize()
 
@@ -197,31 +189,31 @@
 	host.set_glide_size(DELAY2GLIDESIZE(supposed_delay))
 
 // Stop effect
-/datum/movement_handler/mob/stop_effect/DoMove(direction, mob/mover, is_external)
-	if(MayMove(mover, is_external) == MOVEMENT_STOP)
+/datum/movement_handler/mob/stop_effect/DoMove()
+	if(MayMove() == MOVEMENT_STOP)
 		return MOVEMENT_HANDLED
 
-/datum/movement_handler/mob/stop_effect/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/stop_effect/MayMove()
 	for(var/obj/effect/stop/S in mob.loc)
 		if(S.victim == mob)
 			return MOVEMENT_STOP
 	return MOVEMENT_PROCEED
 
 // Transformation
-/datum/movement_handler/mob/transformation/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/transformation/MayMove()
 	return MOVEMENT_STOP
 
 // Consciousness - Is the entity trying to conduct the move conscious?
-/datum/movement_handler/mob/conscious/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/conscious/MayMove(mob/mover)
 	return (mover ? mover.stat == CONSCIOUS : mob.stat == CONSCIOUS) ? MOVEMENT_PROCEED : MOVEMENT_STOP
 
 // Along with more physical checks
-/datum/movement_handler/mob/physically_capable/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/physically_capable/MayMove(mob/mover)
 	// We only check physical capability if the host mob tried to do the moving
 	return ((mover && mover != mob) || !mob.incapacitated(INCAPACITATION_DISABLED & ~INCAPACITATION_FORCELYING)) ? MOVEMENT_PROCEED : MOVEMENT_STOP
 
 // Is anything physically preventing movement?
-/datum/movement_handler/mob/physically_restrained/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/physically_restrained/MayMove(mob/mover)
 	if(istype(mob.buckled) && !(mob.buckled.buckle_movable || mob.buckled.buckle_relaymove))
 		if(mover == mob)
 			to_chat(mob, SPAN("notice", "You're buckled to \the [mob.buckled]!"))
@@ -238,7 +230,7 @@
 		return MOVEMENT_STOP
 
 	for(var/obj/item/grab/G in mob.grabbed_by)
-		if(G.assailant != mob && G.assailant != mover && (mob.restrained() || G.stop_move()))
+		if(G.stop_move())
 			if(mover == mob)
 				to_chat(mob, SPAN("notice", "You're stuck in a grab!"))
 			mob.ProcessGrabs()
@@ -260,14 +252,14 @@
 /mob/living/ProcessGrabs()
 	//if we are being grabbed
 	if(grabbed_by.len)
-		resist_grab("auto_move_process") // Uses GRAB_RESIST_CD and does not touch click cooldown.
+		resist() //shortcut for resisting grabs
 
 /mob/proc/ProcessGrabs()
 	return
 
 
 // Finally.. the last of the mob movement junk
-/datum/movement_handler/mob/movement/DoMove(direction, mob/mover, is_external)
+/datum/movement_handler/mob/movement/DoMove(direction, mob/mover)
 	. = MOVEMENT_HANDLED
 	if(mob.moving)
 		return
@@ -289,17 +281,10 @@
 
 	step(mob, direction)
 
-	if(QDELETED(mob))
+	if(!mob)
 		return // If the mob gets deleted on move (e.g. Entered, whatever), it wipes this reference on us in Destroy (and we should be aborting all action anyway).
 	// Something with pulling things
-
-	if(mob.loc == old_turf) // Did not move for whatever reason.
-		mob.moving = FALSE
-		return
-
-	var/turf/new_loc = mob.loc
-	if(istype(new_loc))
-		HandleGrabs(direction, old_turf)
+	HandleGrabs(direction, old_turf)
 
 	for(var/obj/item/grab/G in mob)
 		if(G.reverse_moving())
@@ -310,9 +295,9 @@
 	for(var/obj/item/grab/G in mob.grabbed_by)
 		G.adjust_position()
 
-	mob.moving = FALSE
+	mob.moving = 0
 
-/datum/movement_handler/mob/movement/MayMove(mob/mover, is_external)
+/datum/movement_handler/mob/movement/MayMove(mob/mover)
 	return IS_SELF(mover) && mob.moving ? MOVEMENT_STOP : MOVEMENT_PROCEED
 
 /datum/movement_handler/mob/movement/proc/HandleGrabs(direction, old_turf)

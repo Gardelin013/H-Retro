@@ -275,27 +275,12 @@
 	if(!(new_hull.icon_state in icon_states))
 		return
 
-	// NOTE: Personally, I hate boilerplate, but I currently don't have the mental capacity to deal with emotes code.
-	var/datum/robot_hull/old_hull = module_hulls[icontype]
-	for (var/datum/emote/typepath as anything in old_hull?.default_emotes)
-		var/datum/emote/emote_to_remove = GLOB.all_emotes[typepath]
-		clear_emote(emote_to_remove.key)
-		if (!isnull(emote_to_remove.statpanel_proc))
-			verbs -= emote_to_remove.statpanel_proc
-
-	for (var/datum/emote/typepath as anything in new_hull.default_emotes)
-		var/datum/emote/emote_to_add = GLOB.all_emotes[typepath]
-		set_emote(emote_to_add.key, emote_to_add)
-		if (!isnull(emote_to_add.statpanel_proc))
-			verbs |= emote_to_add.statpanel_proc
-
 	icontype = new_icontype
 	icon = new_hull.icon
 	icon_state = new_hull.icon_state
 	footstep_sound = (new_hull.hull_flags & ROBOT_HULL_FLAG_HAS_FOOTSTEPS) ? new_hull.footstep_sound : null
 
 	update_icon()
-	update_transform()
 
 	return TRUE
 
@@ -496,10 +481,16 @@
 // this function displays jetpack pressure in the stat panel
 /mob/living/silicon/robot/proc/show_jetpack_pressure()
 	// if you have a jetpack, show the internal tank pressure
-	var/obj/item/tank/jetpack/current_jetpack = get_jetpack()
+	var/obj/item/tank/jetpack/current_jetpack = installed_jetpack()
 	if (current_jetpack)
 		stat("Internal Atmosphere Info", current_jetpack.name)
 		stat("Tank Pressure", current_jetpack.air_contents.return_pressure())
+
+// this function returns the robots jetpack, if one is installed
+/mob/living/silicon/robot/proc/installed_jetpack()
+	if(module)
+		return (locate(/obj/item/tank/jetpack) in module.modules)
+	return null
 
 // this function displays the cyborgs current cell charge in the stat panel
 /mob/living/silicon/robot/proc/show_cell_power()
@@ -578,7 +569,7 @@
 
 		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 		adjustBruteLoss(-30)
-		update_health()
+		updatehealth()
 		add_fingerprint(user)
 		for(var/mob/O in viewers(user, null))
 			O.show_message(text("<span class='warning'>[user] has fixed some of the dents on [src]!</span>"), 1)
@@ -591,7 +582,7 @@
 		if (coil.use(1))
 			user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 			adjustFireLoss(-30)
-			update_health()
+			updatehealth()
 			for(var/mob/O in viewers(user, null))
 				O.show_message(text("<span class='warning'>[user] has fixed some of the burnt wires on [src]!</span>"), 1)
 
@@ -821,7 +812,7 @@
 
 	ClearOverlays()
 
-	if (stat == CONSCIOUS && (using_hull.hull_flags & ROBOT_HULL_FLAG_HAS_EYES))
+	if (!is_ic_dead() && (using_hull.hull_flags & ROBOT_HULL_FLAG_HAS_EYES))
 		var/eyes_icon_state = "eyes-[using_hull.icon_state]"
 
 		AddOverlays(eyes_icon_state)
@@ -941,6 +932,17 @@
 /mob/living/silicon/robot/proc/radio_menu()
 	silicon_radio.interact(src)//Just use the radio's Topic() instead of bullshit special-snowflake code
 
+/mob/living/silicon/robot/get_active_item()
+	var/obj/item/I = ..()
+	var/obj/item/gripper/grip = I
+	if(istype(grip))
+		return grip.wrapped
+	var/obj/item/surgical_selector/SS = I
+	if(istype(SS))
+		return SS.selected_tool
+	return I
+
+
 /mob/living/silicon/robot/Move(newloc, direct)
 	. = ..()
 	if(!.)
@@ -1053,17 +1055,15 @@
 		return 1
 	return 0
 
-/mob/living/silicon/robot/activate_held_object()
+/mob/living/silicon/robot/mode()
 	set name = "Activate Held Object"
 	set category = "IC"
 	set src = usr
 
-	use_attack_self()
-	return
-
-/mob/living/silicon/robot/use_attack_self(is_active_hand = TRUE)
 	var/obj/item/I = get_active_hand()
 	I?.attack_self(src)
+
+	return
 
 /mob/living/silicon/robot/proc/choose_hull(list/module_hulls)
 	if(!length(module_hulls))

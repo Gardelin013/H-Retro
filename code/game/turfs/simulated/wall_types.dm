@@ -20,14 +20,6 @@
 /turf/simulated/wall/ocp_wall/Initialize(mapload)
 	. = ..(mapload, MATERIAL_OSMIUM_CARBIDE_PLASTEEL, MATERIAL_OSMIUM_CARBIDE_PLASTEEL)
 
-/turf/simulated/wall/r_duranium
-	icon_state = "rduranium"
-
-	explosion_block = 3
-
-/turf/simulated/wall/r_duranium/Initialize(mapload)
-	. = ..(mapload, MATERIAL_DURANIUM, MATERIAL_DURANIUM)
-
 /turf/simulated/wall/cult
 	icon_state = "cult"
 	var/previous_type = /turf/simulated/wall

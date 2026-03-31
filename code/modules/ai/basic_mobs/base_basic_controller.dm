@@ -27,3 +27,10 @@
 /datum/ai_controller/basic_controller/proc/update_speed(mob/living/basic_mob)
 	SIGNAL_HANDLER
 	movement_delay = basic_mob.cached_slowdown
+
+/mob/living/carbon/alien
+	ai_controller = /datum/ai_controller/basic_controller/simple_hostile
+
+/mob/living/carbon/alien/Initialize()
+	. = ..()
+	ai_controller = new ai_controller(src)

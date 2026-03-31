@@ -168,7 +168,7 @@
 
 	..() //and give it the regular chance of being deleted outright
 
-/obj/machinery/camera/hitby(atom/movable/AM, datum/thrownthing/TT)
+/obj/machinery/camera/hitby(atom/movable/AM, speed, nomsg)
 	..()
 	if(istype(AM, /obj))
 		var/obj/O = AM

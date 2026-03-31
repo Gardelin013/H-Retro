@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * @file
  * @copyright 2020 Aleksej Komarov
@@ -10,6 +11,10 @@ const logger = createLogger("AudioPlayer");
 
 export class AudioPlayer {
   constructor() {
+    // Doesn't support HTMLAudioElement
+    if (Byond.IS_LTE_IE9) {
+      return;
+    }
     // Set up the HTMLAudioElement node
     this.node = document.createElement("audio");
     this.node.style.setProperty("display", "none");

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * @file
  * @copyright 2020 Aleksej Komarov
@@ -11,6 +12,10 @@ import { DraggableControl } from "./DraggableControl";
 import { NumberInput } from "./NumberInput";
 
 export const Slider = (props) => {
+  // IE8: I don't want to support a yet another component on IE8.
+  if (Byond.IS_LTE_IE8) {
+    return <NumberInput {...props} />;
+  }
   const {
     // Draggable props (passthrough)
     animated,
@@ -63,7 +68,7 @@ export const Slider = (props) => {
         const scaledFillValue = scale(
           fillValue ?? displayValue,
           minValue,
-          maxValue,
+          maxValue
         );
         const scaledDisplayValue = scale(displayValue, minValue, maxValue);
         const effectiveColor =

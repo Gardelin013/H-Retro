@@ -34,7 +34,7 @@
 	healthcheck()
 	return
 
-/obj/structure/alien/hitby(atom/movable/AM, datum/thrownthing/TT)
+/obj/structure/alien/hitby(atom/movable/AM, speed, nomsg)
 	..()
 	var/tforce = 0
 	if(ismob(AM))

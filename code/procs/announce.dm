@@ -23,7 +23,7 @@
 	if(job.department_flag & (COM | CIV | MSC))
 		return "Common"
 	if(job.department_flag & SUP)
-		return "Cargo"
+		return "Supply"
 	if(job.department_flag & SPT)
 		return "Command"
 	if(job.department_flag & SEC)
@@ -35,7 +35,7 @@
 	if(job.department_flag & SCI)
 		return "Science"
 	if(job.department_flag & SRV)
-		return "Provisioning"
+		return "Service"
 	if(job.department_flag & EXP)
 		return "Exploration"
 	return "Common"

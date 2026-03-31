@@ -1,3 +1,4 @@
+
 /obj/item/grab
 	name = "grab"
 	canremove = FALSE
@@ -19,7 +20,6 @@
 	var/attacking = 0
 	var/target_zone
 	var/done_struggle = FALSE // Used by struggle grab datum to keep track of state.
-	var/grace_until = 0
 
 	w_class = ITEM_SIZE_NO_CONTAINER
 	throw_range = 3
@@ -38,6 +38,8 @@
 	var/obj/item/O = get_targeted_organ()
 
 	SetName("[name] ([O.name])")
+
+	add_think_ctx("handle_resist", CALLBACK(src, nameof(.proc/handle_resist)), 0)
 
 	if(start_grab_name)
 		current_grab = all_grabstates[start_grab_name]
@@ -94,7 +96,7 @@
 	if(!assailant)
 		return
 	var/hit_zone = assailant.zone_sel.selecting
-	if(src != assailant.get_clicking_hand())
+	if(src != assailant.get_active_hand())
 		return 0
 	if(hit_zone && hit_zone != last_target)
 		last_target = hit_zone
@@ -155,7 +157,7 @@
 		to_chat(assailant, "<span class='notice'>You can't grab yourself.</span>")
 		return 0
 
-	if(assailant.get_clicking_hand())
+	if(assailant.get_active_hand())
 		to_chat(assailant, "<span class='notice'>You can't grab someone if your hand is full.</span>")
 		return 0
 
@@ -244,20 +246,13 @@
 	return current_grab.throw_held(src)
 
 /obj/item/grab/proc/handle_resist()
-	if(!affecting)
-		return
-	if(current_grab?.state_name != NORM_STRUGGLE || done_struggle)
-		return
-	affecting.try_grab_resist("auto_struggle_ctx")
-	if(QDELETED(src))
-		return
 	current_grab.handle_resist(src)
 
 /obj/item/grab/proc/adjust_position(force = FALSE)
 	if(force)
 		affecting.forceMove(assailant.loc)
 
-	if(!assailant || !affecting || (!assailant.Adjacent(affecting) && affecting.moving_diagonally != /atom/movable::FIRST_DIAGONAL_STEP))
+	if(!assailant || !affecting || !assailant.Adjacent(affecting))
 		delete_self()
 		return FALSE
 	else

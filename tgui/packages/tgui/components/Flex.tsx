@@ -18,6 +18,8 @@ export type FlexProps = BoxProps & {
 export const computeFlexClassName = (props: FlexProps) => {
   return classes([
     "Flex",
+    Byond.IS_LTE_IE10 &&
+      (props.direction === "column" ? "Flex--iefix--column" : "Flex--iefix"),
     props.inline && "Flex--inline",
   ]);
 };
@@ -61,7 +63,14 @@ export type FlexItemProps = BoxProps & {
 };
 
 export const computeFlexItemClassName = (props: FlexItemProps) => {
-  return classes(["Flex__item"]);
+  return classes([
+    "Flex__item",
+    Byond.IS_LTE_IE10 && "Flex__item--iefix",
+    Byond.IS_LTE_IE10 &&
+      props.grow &&
+      props.grow > 0 &&
+      "Flex__item--iefix--grow",
+  ]);
 };
 
 export const computeFlexItemProps = (props: FlexItemProps) => {

@@ -4,26 +4,26 @@
  * @license MIT
  */
 
-import { createCompiler } from "./compiler.js";
+import { createCompiler } from "./webpack.js";
 import { reloadByondCache } from "./reloader.js";
 
-// Vite watch mode always does full rebuilds (no webpack-style HMR chunks).
+const noHot = process.argv.includes("--no-hot");
 const noTmp = process.argv.includes("--no-tmp");
 const reloadOnce = process.argv.includes("--reload");
 
 const setupServer = async () => {
   const compiler = await createCompiler({
     mode: "development",
+    hot: !noHot,
+    devServer: true,
     useTmpFolder: !noTmp,
   });
-
-  // One-shot: just copy current bundles to BYOND cache and exit
+  // Reload cache once
   if (reloadOnce) {
     await reloadByondCache(compiler.bundleDir);
     return;
   }
-
-  // Normal: watch for changes and keep reloading
+  // Run a development server
   await compiler.watch();
 };
 

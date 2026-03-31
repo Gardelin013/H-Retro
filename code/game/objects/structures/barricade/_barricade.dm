@@ -37,7 +37,7 @@
 /obj/structure/barricade/attackby(obj/item/W, mob/user)
 	if(W.force && user.a_intent == I_HURT)
 		attack_generic(user, W.force, "")
-		W.set_cooldown()
+		user.setClickCooldown(W.update_attack_cooldown())
 
 		attack_animation(user)
 		obj_attack_sound(W)
@@ -61,10 +61,6 @@
 			take_damage(maxdamage * 0.4)
 
 
-/obj/structure/barricade/bullet_act(obj/item/projectile/P)
-	take_damage(P.damage)
-	return PROJECTILE_CONTINUE
-
 /obj/structure/barricade/proc/take_damage(amount)
 	damage = clamp(damage + amount, 0, maxdamage)
 
@@ -74,7 +70,7 @@
 
 
 /obj/structure/barricade/proc/Break()
-	return
+	pass()
 
 
 /obj/structure/barricade/security/CanPass(atom/movable/mover, turf/target)

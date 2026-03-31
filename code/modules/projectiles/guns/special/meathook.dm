@@ -8,8 +8,7 @@
 	fire_sound = 'sound/weapons/meathook.ogg'
 	fire_sound_text = "clanging chains"
 	clumsy_unaffected = TRUE
-	fire_delay = 4 SECONDS
-	space_recoil = FALSE
+	fire_delay = 40
 
 	var/projectile_type = /obj/item/projectile/meathook
 

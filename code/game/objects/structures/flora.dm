@@ -12,13 +12,6 @@
 	var/cut_level = PLANT_CUT
 	var/cut_hits = 20
 
-/obj/structure/flora/tree/Initialize()
-	. = ..()
-	add_debris_element()
-
-/obj/structure/flora/tree/add_debris_element()
-	AddElement(/datum/element/debris, DEBRIS_WOOD, -10, 5)
-
 /obj/structure/flora/tree/attackby(obj/item/W, mob/living/user)
 	if(istype(W, /obj/item/material/twohanded/chainsaw))
 		if(do_after(usr, TIME_CUT))
@@ -45,8 +38,8 @@
 	icon = 'icons/obj/flora/pinetrees.dmi'
 	icon_state = "pine_1"
 
-/obj/structure/flora/tree/pine/Initialize()
-	. = ..()
+/obj/structure/flora/tree/pine/New()
+	..()
 	icon_state = "pine_[rand(1, 3)]"
 
 /obj/structure/flora/tree/pine/xmas
@@ -59,9 +52,8 @@
 	var/l_outer_range = 2
 	var/l_falloff_curve = 2
 	var/l_color = "#ec8b2f"
-
-/obj/structure/flora/tree/pine/xmas/Initialize()
-	. = ..()
+/obj/structure/flora/tree/pine/xmas/New()
+	..()
 	icon_state = "pine_c"
 
 /obj/structure/flora/tree/pine/xmas/on_update_icon()
@@ -103,13 +95,13 @@
 	icon = 'icons/obj/flora/deadtrees.dmi'
 	icon_state = "tree_12"
 
-/obj/structure/flora/tree/dead/deadtree/Initialize()
-	. = ..()
+/obj/structure/flora/tree/dead/deadtree/New()
+	..()
 	icon_state = "tree_[rand(1, 12)]"
 
-/obj/structure/flora/tree/tall/Initialize()
-	. = ..()
+/obj/structure/flora/tree/tall/New()
 	icon_state = "tree_[rand(1,6)]"
+	..()
 
 /obj/structure/flora/tree/pine/old_pinteree
 	name = "xmas tree"
@@ -119,8 +111,8 @@
 	pixel_x = 0
 	pixel_y = 0
 
-/obj/structure/flora/tree/pine/old_pinteree/Initialize()
-	. = ..()
+/obj/structure/flora/tree/pine/old_pinteree/New()
+	..()
 	icon_state = "old_pinetree"
 
 /obj/structure/flora/tree/green
@@ -229,23 +221,23 @@
 /obj/structure/flora/grass/brown
 	icon_state = "snowgrass1bb"
 
-/obj/structure/flora/grass/brown/Initialize()
-	. = ..()
+/obj/structure/flora/grass/brown/New()
+	..()
 	icon_state = "snowgrass[rand(1, 3)]bb"
 
 
 /obj/structure/flora/grass/green
 	icon_state = "snowgrass1gb"
 
-/obj/structure/flora/grass/green/Initialize()
-	. = ..()
+/obj/structure/flora/grass/green/New()
+	..()
 	icon_state = "snowgrass[rand(1, 3)]gb"
 
 /obj/structure/flora/grass/both
 	icon_state = "snowgrassall1"
 
-/obj/structure/flora/grass/both/Initialize()
-	. = ..()
+/obj/structure/flora/grass/both/New()
+	..()
 	icon_state = "snowgrassall[rand(1, 3)]"
 
 
@@ -256,8 +248,8 @@
 	icon_state = "snowbush1"
 	anchored = 1
 
-/obj/structure/flora/bush/Initialize()
-	. = ..()
+/obj/structure/flora/bush/New()
+	..()
 	icon_state = "snowbush[rand(1, 6)]"
 
 /obj/structure/flora/pottedplant
@@ -360,8 +352,8 @@
 			qdel(src)
 		return
 
-/obj/structure/flora/ausbushes/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/New()
+	..()
 	icon_state = "firstbush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/glowshroom
@@ -369,114 +361,114 @@
 	icon = 'icons/obj/flora/misc.dmi'
 	icon_state = "glowshroom_1"
 
-/obj/structure/flora/ausbushes/glowshroom/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/glowshroom/New()
+	..()
 	icon_state = "glowshroom_[rand(1, 4)]"
 	set_light(1, 0.6, 1, 2, "#99FF66")
 
 /obj/structure/flora/ausbushes/reedbush
 	icon_state = "reedbush_1"
 
-/obj/structure/flora/ausbushes/reedbush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/reedbush/New()
+	..()
 	icon_state = "reedbush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/leafybush
 	icon_state = "leafybush_1"
 
-/obj/structure/flora/ausbushes/leafybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/leafybush/New()
+	..()
 	icon_state = "leafybush_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/palebush
 	icon_state = "palebush_1"
 
-/obj/structure/flora/ausbushes/palebush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/palebush/New()
+	..()
 	icon_state = "palebush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/stalkybush
 	icon_state = "stalkybush_1"
 
-/obj/structure/flora/ausbushes/stalkybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/stalkybush/New()
+	..()
 	icon_state = "stalkybush_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/grassybush
 	icon_state = "grassybush_1"
 
-/obj/structure/flora/ausbushes/grassybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/grassybush/New()
+	..()
 	icon_state = "grassybush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/fernybush
 	icon_state = "fernybush_1"
 
-/obj/structure/flora/ausbushes/fernybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/fernybush/New()
+	..()
 	icon_state = "fernybush_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/sunnybush
 	icon_state = "sunnybush_1"
 
-/obj/structure/flora/ausbushes/sunnybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/sunnybush/New()
+	..()
 	icon_state = "sunnybush_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/genericbush
 	icon_state = "genericbush_1"
 
-/obj/structure/flora/ausbushes/genericbush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/genericbush/New()
+	..()
 	icon_state = "genericbush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/pointybush
 	icon_state = "pointybush_1"
 
-/obj/structure/flora/ausbushes/pointybush/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/pointybush/New()
+	..()
 	icon_state = "pointybush_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/lavendergrass
 	icon_state = "lavendergrass_1"
 
-/obj/structure/flora/ausbushes/lavendergrass/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/lavendergrass/New()
+	..()
 	icon_state = "lavendergrass_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/ywflowers
 	icon_state = "ywflowers_1"
 
-/obj/structure/flora/ausbushes/ywflowers/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/ywflowers/New()
+	..()
 	icon_state = "ywflowers_[rand(1, 4)]"
 
 /obj/structure/flora/ausbushes/brflowers
 	icon_state = "brflowers_1"
 
-/obj/structure/flora/ausbushes/brflowers/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/brflowers/New()
+	..()
 	icon_state = "brflowers_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/ppflowers
 	icon_state = "ppflowers_1"
 
-/obj/structure/flora/ausbushes/ppflowers/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/ppflowers/New()
+	..()
 	icon_state = "ppflowers_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/sparsegrass
 	icon_state = "sparsegrass_1"
 
-/obj/structure/flora/ausbushes/sparsegrass/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/sparsegrass/New()
+	..()
 	icon_state = "sparsegrass_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/fullgrass
 	icon_state = "fullgrass_1"
 
-/obj/structure/flora/ausbushes/fullgrass/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/fullgrass/New()
+	..()
 	icon_state = "fullgrass_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/jungleflora
@@ -486,38 +478,38 @@
 /obj/structure/flora/ausbushes/jungleflora/busha
 	icon_state = "busha"
 
-/obj/structure/flora/ausbushes/jungleflora/busha/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/jungleflora/busha/New()
+	..()
 	icon_state = "busha[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/jungleflora/bushb
 	icon_state = "bushb"
 
-/obj/structure/flora/ausbushes/jungleflora/bushb/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/jungleflora/bushb/New()
+	..()
 	icon_state = "bushb[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/jungleflora/bushc
 	icon_state = "bushc"
 
-/obj/structure/flora/ausbushes/jungleflora/bushc/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/jungleflora/bushc/New()
+	..()
 	icon_state = "bushc[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/jungleflora/grassa
 	name = "grass"
 	icon_state = "grassa"
 
-/obj/structure/flora/ausbushes/jungleflora/grassa/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/jungleflora/grassa/New()
+	..()
 	icon_state = "grassa[rand(1, 5)]"
 
 /obj/structure/flora/ausbushes/jungleflora/grassb
 	name = "grass"
 	icon_state = "grassb"
 
-/obj/structure/flora/ausbushes/jungleflora/grassb/Initialize()
-	. = ..()
+/obj/structure/flora/ausbushes/jungleflora/grassb/New()
+	..()
 	icon_state = "grassb[rand(1, 5)]"
 
 /obj/structure/flora/goonbushes
@@ -584,10 +576,10 @@
 	cut_level = PLANT_CUT
 	var/rand_state = TRUE
 
-/obj/structure/flora/junglevines/light/Initialize()
-	. = ..()
+/obj/structure/flora/junglevines/light/New()
 	if(rand_state)
 		icon_state = "light[rand(0, 2)]"
+	..()
 
 /obj/structure/flora/junglevines/light/CanPass(atom/movable/mover, turf/target)
 	if(istype(mover, /mob/living))
@@ -606,10 +598,10 @@
 	cut_hits = 10
 	var/rand_state = TRUE
 
-/obj/structure/flora/junglevines/heavy/Initialize()
-	. = ..()
+/obj/structure/flora/junglevines/heavy/New()
 	if(rand_state)
 		icon_state = "heavy[rand(0, 5)]"
+	..()
 
 /obj/structure/flora/junglevines/heavy/CanPass(atom/movable/mover, turf/target)
 	if(istype(mover, /mob/living))
@@ -795,10 +787,10 @@
 	l_color = COLOR_GREEN_GRAY
 	var/rand_state = TRUE
 
-/obj/structure/flora/jungleplants/glowshroom/Initialize()
-	. = ..()
+/obj/structure/flora/jungleplants/glowshroom/New()
 	if(rand_state)
 		icon_state = "glowshroom[rand(0, 3)]"
+	..()
 
 /obj/structure/flora/ausbushes/jungleplants/Initialize()
  	update_icon()
@@ -819,24 +811,24 @@
 	icon_state = "ywflowers_1"
 	l_color = COLOR_YELLOW
 
-/obj/structure/flora/jungleplants/glowingflower/yellow/Initialize()
-	. = ..()
+/obj/structure/flora/jungleplants/glowingflower/yellow/New()
+	..()
 	icon_state = "ywflowers_[rand(1, 4)]"
 
 /obj/structure/flora/jungleplants/glowingflower/blue
 	icon_state = "brflowers_1"
 	l_color = COLOR_BLUE_LIGHT
 
-/obj/structure/flora/jungleplants/glowingflower/blue/Initialize()
-	. = ..()
+/obj/structure/flora/jungleplants/glowingflower/blue/New()
+	..()
 	icon_state = "brflowers_[rand(1, 3)]"
 
 /obj/structure/flora/jungleplants/glowingflower/purple
 	icon_state = "ppflowers_1"
 	l_color = COLOR_PURPLE
 
-/obj/structure/flora/jungleplants/glowingflower/purple/Initialize()
-	. = ..()
+/obj/structure/flora/jungleplants/glowingflower/purple/New()
+	..()
 	icon_state = "brflowers_[rand(1, 3)]"
 
 //potted plants credit: Flashkirby

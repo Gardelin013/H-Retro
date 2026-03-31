@@ -48,7 +48,8 @@
 	H.adjustOxyLoss(-5)
 	H.adjustFireLoss(-10)
 
-	for(var/obj/item/organ/internal/regen_organ in shuffle(H.internal_organs))
+	for(var/bpart in shuffle(H.internal_organs_by_name))
+		var/obj/item/organ/internal/regen_organ = H.internal_organs_by_name[bpart]
 		if(BP_IS_ROBOTIC(regen_organ))
 			continue
 		if(istype(regen_organ))

@@ -299,7 +299,7 @@
 /obj/machinery/cryopod/Destroy()
 	if(occupant)
 		occupant.forceMove(loc)
-		occupant.set_resting(TRUE)
+		occupant.resting = 1
 	. = ..()
 
 /obj/machinery/cryopod/Initialize()

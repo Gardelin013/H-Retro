@@ -17,7 +17,7 @@
 
 	var/on = 0
 	var/list/active_scanned = list() //assoc list of objects being scanned, mapped to their overlay
-	var/mob/user_mob //since making sure overlays are properly added and removed is pretty important, so we track the current user explicitly
+	var/client/user_client //since making sure overlays are properly added and removed is pretty important, so we track the current user explicitly
 	var/base_state = "t-ray"
 
 	var/global/list/overlay_cache = list() //cache recent overlays
@@ -44,7 +44,7 @@
 		set_next_think(world.time + 1 SECOND)
 	else
 		set_next_think(0)
-		set_user_mob(null)
+		set_user_client(null)
 	update_icon()
 
 //If reset is set, then assume the client has none of our overlays, otherwise we only send new overlays.
@@ -53,12 +53,14 @@
 		return
 
 	//handle clients changing
-	if(ismob(loc))
-		var/mob/M = loc
-		set_user_mob(M)
+	var/client/loc_client = null
+	if(ismob(src.loc))
+		var/mob/M = src.loc
+		loc_client = M.client
+	set_user_client(loc_client)
 
 	//no sense processing if no-one is going to see it.
-	if(!user_mob)
+	if(!user_client)
 		set_next_think(world.time + 1 SECOND)
 		return
 
@@ -71,11 +73,11 @@
 	for(var/obj/O in update_add)
 		var/image/overlay = get_overlay(O)
 		active_scanned[O] = overlay
-		user_mob.add_client_image(overlay)
+		user_client.images += overlay
 
 	//Remove stale overlays
 	for(var/obj/O in update_remove)
-		user_mob.remove_client_image(active_scanned[O])
+		user_client.images -= active_scanned[O]
 		active_scanned -= O
 
 	set_next_think(world.time + 1 SECOND)
@@ -147,22 +149,22 @@
 
 
 
-/obj/item/device/t_scanner/proc/set_user_mob(mob/new_mob)
-	if(new_mob == user_mob)
+/obj/item/device/t_scanner/proc/set_user_client(client/new_client)
+	if(new_client == user_client)
 		return
-	if(user_mob)
+	if(user_client)
 		for(var/scanned in active_scanned)
-			user_mob.remove_client_image(active_scanned[scanned])
-	if(new_mob)
+			user_client.images -= active_scanned[scanned]
+	if(new_client)
 		for(var/scanned in active_scanned)
-			new_mob.add_client_image(active_scanned[scanned])
+			new_client.images += active_scanned[scanned]
 	else
 		active_scanned.Cut()
 
-	user_mob = new_mob
+	user_client = new_client
 
 /obj/item/device/t_scanner/dropped(mob/user)
-	set_user_mob(null)
+	set_user_client(null)
 	..()
 
 /obj/item/device/t_scanner/advanced

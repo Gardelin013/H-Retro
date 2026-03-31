@@ -44,7 +44,6 @@
 
 	next_click = world.time + 1
 
-	rightclicked = FALSE
 	var/list/modifiers = params2list(params)
 	var/dragged = modifiers["drag"]
 	if(dragged && !modifiers[dragged])
@@ -68,49 +67,35 @@
 		if(modifiers["ctrl"])
 			CtrlRightClickOn(A)
 			return 1
-		if(twohanded_mode)
-			rightclicked = TRUE
-		else
-			return
-
-	if(!rightclicked)
-		if(modifiers["shift"] && modifiers["ctrl"])
-			CtrlShiftClickOn(A)
-			return 1
-		if(modifiers["ctrl"] && modifiers["alt"])
-			CtrlAltClickOn(A)
-			return 1
-		if(modifiers["middle"])
-			if(modifiers["shift"])
-				ShiftMiddleClickOn(A)
-			else if(modifiers["alt"])
-				AltMiddleClickOn(A)
-			else
-				MiddleClickOn(A)
-			return 1
+		return
+	if(modifiers["shift"] && modifiers["ctrl"])
+		CtrlShiftClickOn(A)
+		return 1
+	if(modifiers["ctrl"] && modifiers["alt"])
+		CtrlAltClickOn(A)
+		return 1
+	if(modifiers["middle"])
 		if(modifiers["shift"])
-			ShiftClickOn(A)
-			return 0
-		if(modifiers["alt"]) // alt and alt-gr (rightalt)
-			AltClickOn(A)
-			return 1
-		if(modifiers["ctrl"])
-			CtrlClickOn(A)
-			return 1
+			ShiftMiddleClickOn(A)
+		else
+			MiddleClickOn(A)
+		return 1
+	if(modifiers["shift"])
+		ShiftClickOn(A)
+		return 0
+	if(modifiers["alt"]) // alt and alt-gr (rightalt)
+		AltClickOn(A)
+		return 1
+	if(modifiers["ctrl"])
+		CtrlClickOn(A)
+		return 1
 
-	. = NormalClickOn(A, params)
-	rightclicked = FALSE
-	return
-
-/mob/proc/NormalClickOn(atom/A, params)
 	if(stat || paralysis || stunned || weakened)
 		return
 
 	face_atom(A) // change direction to face what you clicked on
 
-	var/obj/item/I = get_clicking_hand()
-
-	if(!canClick(I)) // in the year 2000...
+	if(!canClick()) // in the year 2000...
 		return
 
 	if(istype(loc, /obj/mecha))
@@ -131,10 +116,12 @@
 			return 1
 		throw_mode_off()
 
+	var/obj/item/I = get_active_hand()
+
 	if(I == A) // Handle attack_self
 		I.attack_self(src)
 		trigger_aiming(TARGET_CAN_CLICK)
-		if(active_hand == ACTIVE_HAND_LEFT)
+		if(hand)
 			update_inv_l_hand(0)
 		else
 			update_inv_r_hand(0)
@@ -162,28 +149,6 @@
 	//Atoms on turfs (not on your person)
 	// A is a turf or is on a turf, or in something on a turf (pen in a box); but not something in something on a turf (pen in a box in a backpack)
 	sdepth = A.storage_depth_turf()
-
-	if(aim_assist && (!sdepth || isturf(A) || isturf(A.loc)) && !istype(I, /obj/item/gun))
-		var/should_scan = (!isliving(A) || (isliving(A) && !Adjacent(A))) // If the target atom is a hittable mob, skip the scan.
-		should_scan &&= !(!istype(I) && istype(A, /obj/item) && Adjacent(A)) // OR if we are trying to pick up an item with an empty hand, let us.
-		if(should_scan)
-			var/turf/target_turf = get_step_towards(src, A)
-			if(istype(target_turf))
-				for(var/thing in target_turf.contents)
-					if(thing == src || !isliving(thing) || !Adjacent(thing))
-						continue
-					var/mob/living/L = thing
-					if(I)
-						var/resolved = I.resolve_attackby(L, src, params)
-						if(resolved && L && I)
-							I.afterattack(L, src, 1, params)
-					else
-						setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-						UnarmedAttack(L, 1)
-					trigger_aiming(TARGET_CAN_CLICK)
-					return 1
-			return
-
 	if(isturf(A) || isturf(A.loc) || (sdepth != -1 && sdepth <= 1))
 		if(Adjacent(A)) // see adjacent.dm
 			for(var/atom/movable/AM in get_turf(A)) // Checks if A is obscured by something
@@ -215,12 +180,10 @@
 /mob/proc/setClickCooldown(timeout)
 	next_move = max(world.time + timeout, next_move)
 
-/mob/proc/canClick(obj/item/I)
-	if(istype(I) && !I.check_cooldown())
-		return FALSE
+/mob/proc/canClick()
 	if(config.misc.no_click_cooldown || next_move <= world.time)
-		return TRUE
-	return FALSE
+		return 1
+	return 0
 
 // Default behavior: ignore double clicks, the second click that makes the doubleclick call already calls for a normal click
 /mob/proc/DblClickOn(atom/A, params)
@@ -293,9 +256,6 @@
 		if(pointed(A))
 			return
 
-/mob/proc/AltMiddleClickOn(atom/A)
-	pointed(A)
-
 /atom/proc/MiddleClick(mob/M)
 	return
 
@@ -329,21 +289,8 @@
 
 /atom/movable/CtrlClick(mob/user)
 	if(Adjacent(user))
-		return user.start_pulling(src)
+		user.start_pulling(src)
 
-/obj/item/CtrlClick(mob/user)
-	if(ishuman(user) && Adjacent(user) && !user.incapacitated() && !user.restrained())
-		// Quickdrop from storages
-		if(istype(loc, /obj/item/storage))
-			var/obj/item/storage/S = loc
-			S.remove_from_storage(src)
-			return TRUE
-		// Quickdrop from self
-		if(loc == user)
-			user.drop(src)
-			return TRUE
-
-	return ..()
 /*
 	Alt click
 	Unused except for AI
@@ -352,8 +299,20 @@
 	A.AltClick(src)
 
 /atom/proc/AltClick(mob/user)
-	SEND_SIGNAL(src, SIGNAL_ALT_CLICKED, src, user)
-	return
+	var/cancel = SEND_SIGNAL(src, SIGNAL_ALT_CLICKED, src, user)
+	if(cancel)
+		return
+
+	var/turf/T = get_turf(src)
+
+	if(T && user.TurfAdjacent(T))
+		if(user.listed_turf == T)
+			user.listed_turf = null
+		else
+			user.listed_turf = T
+			user.client.statpanel = "Turf"
+
+	return TRUE
 
 /mob/proc/TurfAdjacent(turf/T)
 	return T.AdjacentQuick(src)
@@ -420,16 +379,7 @@
 	A.ShiftRightClick(src)
 
 /atom/proc/ShiftRightClick(mob/user)
-	var/turf/T = get_turf(src)
-
-	if(T && user.TurfAdjacent(T))
-		if(user.listed_turf == T)
-			user.listed_turf = null
-		else
-			user.listed_turf = T
-			user.client.statpanel = "Turf"
-
-	return TRUE
+	return
 
 /*
 	Control+Alt+Rclick

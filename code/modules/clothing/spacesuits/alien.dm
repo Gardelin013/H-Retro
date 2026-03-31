@@ -304,7 +304,7 @@
 
 	to_chat(H, "<span class='notice'>Stealth mode enabled.</span>")
 	cloak = TRUE
-	animate(H,alpha = 255, alpha = 20, time = 10, flags = ANIMATION_PARALLEL)
+	animate(H,alpha = 255, alpha = 20, time = 10)
 
 	var/remain_cloaked = TRUE
 	while(remain_cloaked) //This loop will keep going until the player uncloaks.
@@ -320,7 +320,7 @@
 	"<span class='notice'>Stealth mode disabled.</span>")
 	cloak = FALSE
 
-	animate(H,alpha = 20, alpha = 255, time = 10, flags = ANIMATION_PARALLEL)
+	animate(H,alpha = 20, alpha = 255, time = 10)
 
 /obj/item/clothing/head/helmet/space/vox/medic
 	name = "alien goggled helmet"
@@ -378,7 +378,7 @@
 		return
 	if(nanobots)
 		for(var/mob/living/carbon/human/vox/V in range(2, H))
-			for(var/obj/item/organ/external/regen_organ in V.external_organs)
+			for(var/obj/item/organ/external/regen_organ in V.organs)
 				regen_organ.damage = max(regen_organ.damage - 2, 0)
 			if(V.getBruteLoss())
 				V.adjustBruteLoss(-5 * config.health.organ_regeneration_multiplier)	//Heal brute better than other ouchies.

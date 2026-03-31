@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-unused-vars */
 import { capitalize } from "../../common/string";
 import { useBackend, useLocalState } from "../backend";
 import {

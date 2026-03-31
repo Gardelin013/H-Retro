@@ -14,10 +14,6 @@ export const SETTINGS_TABS = [
     name: "Chat Tabs",
   },
   {
-    id: "tts",
-    name: "Text-to-Speech",
-  },
-  {
     id: "backgroundImage",
     name: "Background Image",
   },

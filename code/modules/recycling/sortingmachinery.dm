@@ -13,31 +13,17 @@
 	var/label_x
 	var/tag_x
 
-/obj/structure/bigDelivery/attack_robot(mob/user)
+/obj/structure/bigDelivery/attack_robot(mob/user as mob)
 	unwrap(user)
 
-/obj/structure/bigDelivery/attack_hand(mob/user)
+/obj/structure/bigDelivery/attack_hand(mob/user as mob)
 	unwrap(user)
 
 /obj/structure/bigDelivery/proc/unwrap(mob/user)
 	if(Adjacent(user))
 		playsound(src, 'sound/effects/using/wrapper/unwrap1.ogg', rand(50, 75), TRUE)
 		// Destroy will drop our wrapped object on the turf, so let it.
-		var/turf/place_to_spawn_papers = get_turf(src)
-		new /obj/item/paper/package/crumpled(place_to_spawn_papers)
-		new /obj/item/paper/package/crumpled(place_to_spawn_papers)
-
-		var/obj/item/paper/package/crumpled/infopaper = new (place_to_spawn_papers)
-		var/infotext = ""
-		if(sortTag)
-			infotext += "\[center]\[large]DESTINATION CODE:\[/large]\[/center]\[br]\[center]\[large]\[b][sortTag]\[/b]\[/large]\[/center]"
-		if(examtext)
-			infotext += "\[hr]\[br]\[i][examtext]\[/i]"
-		if(infotext)
-			infopaper.set_content(infotext)
-			infopaper.update_icon()
-		qdel_self()
-	return
+		qdel(src)
 
 /obj/structure/bigDelivery/attackby(obj/item/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/device/destTagger))
@@ -173,22 +159,11 @@
 		return
 
 	playsound(user, 'sound/effects/using/wrapper/unwrap1.ogg', rand(50, 75), TRUE)
-	var/obj/item/paper/package/crumpled/infopaper = new (get_turf(src))
-	var/infotext = ""
-	if(sortTag)
-		infotext += "\[center]\[large]DESTINATION CODE:\[/large]\[/center]\[br]\[center]\[large]\[b][sortTag]\[/b]\[/large]\[/center]"
-	if(examtext)
-		infotext += "\[hr]\[br]\[i][examtext]\[/i]"
-	if(infotext)
-		infopaper.set_content(infotext)
-		infopaper.update_icon()
-
 	if(ishuman(user))
 		user.replace_item(src, wrapped, TRUE, TRUE)
 	else
 		wrapped.forceMove(get_turf(src))
 		qdel(src)
-	return
 
 /obj/item/smallDelivery/attack_robot(mob/user)
 	unwrap(user)
@@ -300,7 +275,6 @@
 	name = "package wrapper"
 	icon = 'icons/obj/items.dmi'
 	icon_state = "deliveryPaper"
-	item_state = "deliveryPaper"
 	w_class = ITEM_SIZE_NORMAL
 	var/amount = 25.0
 
@@ -313,7 +287,7 @@
 	icon = 'icons/obj/items.dmi'
 	icon_state = "c_tube"
 	throwforce = 1
-	w_class = ITEM_SIZE_NORMAL
+	w_class = ITEM_SIZE_SMALL
 	throw_range = 5
 
 /obj/item/packageWrap/afterattack(obj/target as obj, mob/user as mob, proximity)
@@ -372,7 +346,6 @@
 			add_fingerprint(usr)
 
 			amount -= 1
-			icon_state = "deliveryPaper-used"
 
 			user.visible_message("\The [user] wraps \a [target] with \a [src].",\
 			SPAN("notice", "You wrap \the [target], leaving [amount] units of paper on \the [src]."),\
@@ -394,7 +367,6 @@
 			P.wrapped = O
 			O.forceMove(P)
 			src.amount -= 3
-			icon_state = "deliveryPaper-used"
 			user.visible_message("\The [user] wraps \a [target] with \a [src].",\
 			SPAN("notice", "You wrap \the [target], leaving [amount] units of paper on \the [src]"),\
 			"You hear someone taping paper around a large object.")
@@ -408,7 +380,6 @@
 			O.welded = 1
 			O.forceMove(P)
 			src.amount -= 3
-			icon_state = "deliveryPaper-used"
 			user.visible_message("\The [user] wraps \a [target] with \a [src].",\
 			SPAN("notice", "You wrap \the [target], leaving [amount] units of paper on \the [src]"),\
 			"You hear someone taping paper around a large object.")
@@ -416,13 +387,9 @@
 			to_chat(user, SPAN("warning", "You need more paper"))
 	else
 		to_chat(user, SPAN("notice", "The object you are trying to wrap is unsuitable for the sorting machinery!"))
-
-	if(!amount)
-		var/obj/item/c_tube/CT = new (get_turf(src))
-		if(ishuman(user))
-			user.replace_item(src, CT, TRUE, TRUE)
-		else
-			qdel_self()
+	if (src.amount <= 0)
+		new /obj/item/c_tube( src.loc )
+		qdel(src)
 		return
 	return
 
@@ -533,9 +500,13 @@
 
 	if(prob(35))
 		for(var/mob/living/carbon/human/L in src)
-			var/obj/item/organ/external/E = pick(L.external_organs)
+			var/list/obj/item/organ/external/crush = L.get_damageable_organs()
+			if(!crush.len)
+				return
 
-			E.take_blunt_damage(45, "Blunt Trauma")
+			var/obj/item/organ/external/E = pick(crush)
+
+			E.take_external_damage(45, used_weapon = "Blunt Trauma")
 			to_chat(L, "\The [src]'s mechanisms crush your [E.name]!")
 
 	H.init(src)	// copy the contents of disposer to holder

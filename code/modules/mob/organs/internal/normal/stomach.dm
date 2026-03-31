@@ -25,8 +25,8 @@
 	QDEL_NULL_LIST(processing)
 	. = ..()
 
-/obj/item/organ/internal/stomach/Initialize()
-	. = ..()
+/obj/item/organ/internal/stomach/New()
+	..()
 	ingested = new /datum/reagents/metabolism(volume_hardcap, owner ? owner : null, CHEM_INGEST)
 	if(!ingested.my_atom)
 		ingested.my_atom = src

@@ -8,7 +8,6 @@
 	var/drone_delay
 	var/metroid_delay
 	var/animal_delay
-	var/diagonal_movement_disabled
 
 /datum/configuration_section/movement/load_data(list/data)
 	CONFIG_LOAD_NUM(run_speed, data["run_speed"])
@@ -17,4 +16,3 @@
 	CONFIG_LOAD_NUM(robot_delay, data["robot_delay"])
 	CONFIG_LOAD_NUM(metroid_delay, data["metroid_delay"])
 	CONFIG_LOAD_NUM(animal_delay, data["animal_delay"])
-	CONFIG_LOAD_NUM(diagonal_movement_disabled, data["diagonal_movement_disabled"])

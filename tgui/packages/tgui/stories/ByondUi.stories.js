@@ -10,6 +10,7 @@ import { logger } from "../logging";
 
 export const meta = {
   title: "ByondUi",
+  // eslint-disable-next-line react/display-name
   render: () => <Story />,
 };
 
@@ -17,7 +18,7 @@ const Story = (props, context) => {
   const [code, setCode] = useLocalState(
     context,
     "byondUiEvalCode",
-    `Byond.winset('${Byond.windowId}', {\n  'is-visible': true,\n})`,
+    `Byond.winset('${Byond.windowId}', {\n  'is-visible': true,\n})`
   );
   return (
     <>
@@ -35,8 +36,9 @@ const Story = (props, context) => {
           <Button
             icon="chevron-right"
             onClick={() =>
-              setTimeout(() => {
+              setImmediate(() => {
                 try {
+                  // eslint-disable-next-line no-new-func
                   const result = new Function("return (" + code + ")")();
                   if (result && result.then) {
                     logger.log("Promise");
@@ -47,7 +49,7 @@ const Story = (props, context) => {
                 } catch (err) {
                   logger.log(err);
                 }
-              }, 0)
+              })
             }
           >
             Evaluate

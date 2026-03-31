@@ -66,15 +66,10 @@
 /obj/item/material/coin/attack_self(mob/user)
 	var/result = rand(1, sides)
 	var/comment = ""
-	if(prob(1))
-		result = 3
-	switch(result)
-		if(1)
-			comment = "tails"
-		if(2)
-			comment = "heads"
-		if(3)
-			comment = "<b>its side</b>"
+	if(result == 1)
+		comment = "tails"
+	else if(result == 2)
+		comment = "heads"
 	user.visible_message(SPAN("notice", "[user] has thrown \the [src]. It lands on [comment]!"), \
 						 SPAN("notice", "You throw \the [src]. It lands on [comment]!"))
 	playsound(src, 'sound/items/coinflip.ogg', 50, TRUE)

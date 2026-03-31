@@ -248,9 +248,9 @@
 		var/mob/holder = card.loc
 		if(ishuman(holder))
 			var/mob/living/carbon/human/H = holder
-			for(var/obj/item/organ/external/affecting in H.external_organs)
+			for(var/obj/item/organ/external/affecting in H.organs)
 				if(card in affecting.implants)
-					affecting.take_pierce_damage(rand(30, 50))
+					affecting.take_external_damage(rand(30,50))
 					affecting.implants -= card
 					H.visible_message("<span class='danger'>\The [src] explodes out of \the [H]'s [affecting.name] in a shower of gore!</span>")
 					break
@@ -324,12 +324,12 @@
 
 	// Pass lying down or getting up to our pet human, if we're in a rig.
 	if(istype(src.loc, /obj/item/device/paicard))
-		set_resting(FALSE)
+		resting = 0
 		var/obj/item/rig/rig = get_rig()
 		if(istype(rig))
 			rig.force_rest(src)
 	else
-		set_resting(!resting)
+		resting = !resting
 		icon_state = resting ? "[chassis]_rest" : "[chassis]"
 		to_chat(src, "<span class='notice'>You are now [resting ? "resting" : "getting up"]</span>")
 
@@ -338,7 +338,7 @@
 	if(W.force)
 		visible_message("<span class='danger'>[user.name] attacks [src] with [W]!</span>")
 		src.adjustBruteLoss(W.force)
-		src.update_health()
+		src.updatehealth()
 	else
 		visible_message("<span class='warning'>[user.name] bonks [src] harmlessly with [W].</span>")
 	spawn(1)
@@ -365,7 +365,7 @@
 	src.client.eye = card
 
 	//stop resting
-	set_resting(FALSE)
+	resting = 0
 
 	// If we are being held, handle removing our holder from their inv.
 	var/obj/item/holder/H = loc
@@ -378,7 +378,7 @@
 	// Move us into the card and move the card to the ground.
 	src.forceMove(card)
 	card.forceMove(get_turf(card))
-	set_resting(FALSE)
+	resting = 0
 	icon_state = "[chassis]"
 
 // No binary for pAIs.

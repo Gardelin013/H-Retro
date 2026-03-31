@@ -18,7 +18,7 @@
 
 	if(damage)
 		adjustToxLoss(damage)
-		update_health()
+		updatehealth()
 
 		if(prob(5))
 			if(!container)
@@ -77,12 +77,12 @@
 	else
 		dizziness = max(0, dizziness - 1)
 
-	update_health()
+	updatehealth()
 
 	return //TODO: DEFERRED
 
 /mob/living/carbon/brain/handle_regular_status_updates()	//TODO: comment out the unused bits >_>
-	update_health()
+	updatehealth()
 
 	if(is_ooc_dead())	//DEAD. BROWN BREAD. SWIMMING WITH THE SPESS CARP
 		blinded = 1
