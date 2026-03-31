@@ -312,6 +312,9 @@
 	if(digitalcamo)
 		msg += "[T.He] [T.is] repulsively uncanny!\n"
 
+	if(is_nude() && (potenzia > -1) && gender == MALE && genitals)//Interactions
+		msg += "<B>Penis size: [potenzia]cm.</B>\n"
+
 	if(hasHUD(user, HUD_SECURITY))
 		var/perpname = "wot"
 		var/criminal = "None"

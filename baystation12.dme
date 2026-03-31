@@ -3347,5 +3347,8 @@
 #include "maps\~mapsystem\map_preferences.dm"
 #include "maps\~mapsystem\maps.dm"
 #include "maps\~mapsystem\maps_jobs.dm"
+#include "modular_h\code\interactions.dm"
+#include "modular_h\code\game\objects\effects\decals\Cleanable\misc.dm"
+#include "modular_h\code\modules\mob\living\carbon\human.dm"
 #include "~code\global_init.dm"
 // END_INCLUDE
